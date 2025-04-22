@@ -1,0 +1,1 @@
+<img src="{{ asset('images/title.png') }}" alt="Header Image" class="header-image">

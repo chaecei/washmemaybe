@@ -1,0 +1,46 @@
+body {
+    background-color: #d8c6b7; /* soft brown background */
+    padding: 30px;
+  }
+
+  .table-container {
+    background-color: #fff;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    margin-bottom: 30px;
+  }
+
+  .badge-processing {
+    background-color: #44dd88;
+    color: #fff;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 0.85rem;
+  }
+
+  .notes-table th {
+    background-color: #5ed9f7;
+    color: #000;
+  }
+
+  .notes-table {
+    border: 1px solid #ccc;
+  }
+
+  table {
+    font-family: 'Segoe UI', sans-serif;
+  }
+
+  @media (max-width: 768px) {
+    .table {
+      font-size: 14px;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .table th, .table td {
+      padding: 8px;
+      font-size: 12px;
+    }
+  }
