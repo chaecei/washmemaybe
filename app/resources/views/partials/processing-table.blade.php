@@ -1,4 +1,4 @@
-<div class="table-container">
+<!-- <div class="table-container">
     <div class="table-responsive">
         <table class="table table-bordered text-center">
         <thead class="table-secondary">
@@ -36,4 +36,31 @@
         </tbody>
         </table>
     </div>
-</div>
+</div> -->
+
+
+<table class="table table-bordered text-center">
+    <thead class="table-secondary">
+        <tr>
+            <th>SERVICE NUMBER</th>
+            <th>Status</th>
+            <th>Grand Total</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach($processingServices as $service)
+            <tr>
+                <td>{{ $service->service_number }}</td>
+                <td>{{ $service->status }}</td>
+                <td>{{ number_format($service->grand_total, 2) }}</td>
+                <td>
+                    <form action="{{ route('dashboard.readyforpickup', $service->id) }}" method="POST">
+                        @csrf
+                        <button class="btn btn-warning btn-sm">Ready for Pickup</button>
+                    </form>
+                </td>
+            </tr>
+        @endforeach
+    </tbody>
+</table>

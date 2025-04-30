@@ -53,7 +53,7 @@
   </div>
 
   <!-- Second Table: Additional Notes -->
-  <div class="table-container">
+<div class="table-container">
   <table class="table table-bordered notes-table">
       <thead>
       <tr>
@@ -82,4 +82,3 @@
   </table>
   </div>
 @endsection
-

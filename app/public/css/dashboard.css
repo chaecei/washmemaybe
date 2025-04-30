@@ -23,6 +23,10 @@ a {
     border-top-right-radius: 20px;
     border-bottom-right-radius: 20px;
 }
+.sidebar-nav .nav-link.active {
+    background-color: #007bff;
+    color: white;
+}
 .sidebar ul {
     list-style: none;
     padding-left: 0;

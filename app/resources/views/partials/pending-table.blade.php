@@ -1,4 +1,4 @@
-<div class="pending-content">
+<!-- <div class="pending-content">
 <table class="table table-bordered text-center">
     <thead class="table-secondary">
     <tr>
@@ -47,10 +47,10 @@
     </tr>
     </tbody>
 </table>
-</div>
+</div> -->
 
 <!-- Second Table: Additional Notes -->
-<div class="table-container">
+<!-- <div class="table-container">
 <table class="table table-bordered notes-table">
     <thead>
     <tr>
@@ -73,4 +73,47 @@
     </tr>
     </tbody>
 </table>
-</div>
+</div> -->
+
+<table class="table table-bordered text-center">
+    <thead class="table-secondary">
+        <tr>
+            <th>SERVICE NUMBER</th>
+            <th>Status</th>
+            <th>Grand Total</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach ($pendingServices as $service)
+            <tr>
+                <td>{{ $service->service_number }}</td>
+                <td>{{ $service->status }}</td>
+                <td>{{ number_format($service->grand_total, 2) }}</td>
+                <td>
+                    <form action="{{ route('dashboard.process', $service->id) }}" method="POST">
+                        @csrf
+                        <button class="btn btn-success btn-sm" onclick="alert('Successful!')">Process</button>
+                    </form>
+                </td>
+            </tr>
+        @endforeach
+        </tbody>
+</table>
+
+<table class="table table-bordered notes-table">
+    <thead>
+        <tr>
+            <th>Service Number</th>
+            <th>Additional Notes</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach ($pendingServices->whereNotNull('notes') as $service)
+            <tr>
+                <td>{{ $service->service_number }}</td>
+                <td>{{ $service->notes }}</td>
+            </tr>
+        @endforeach
+    </tbody>
+</table>    

@@ -16,60 +16,119 @@
     
     <div class="main-content">
         
-        <div class="admin-profile">
-            @include('partials.admin')
-        </div>
+    <div class="admin-profile">
+        @include('partials.admin')  
+    </div>
 
+    <div class="header"> 
+        @include('partials.header')
+    </div>
 
-        <div class="header"> 
-            @include('partials.header')
-        </div>
-
-
-            <div class="row mb-4">
-                    <div class="col-md-3">
-                        <a href="{{url('/dashboard/pending') }}">
-                            <div class="card card-pending">
-                                <div class="card-body">
-                                    <h5 class="card-title">Pending</h5>
-                                    <p class="card-text h4">6</p>
-                                </div>
-                            </div>
-                        </a>
+    <div class="row mb-4">
+            <div class="col-md-3">
+                <a href="{{ route('dashboard.pending') }}">
+                    <div class="card card-pending">
+                        <div class="card-body">
+                            <h5 class="card-title" id="pending">Pending</h5>
+                            <p class="card-text h4">9</p>
+                        </div>
                     </div>
-                
-                    <div class="col-md-3">
-                        <a href="{{url('/dashboard/processing') }}">
-                            <div class="card card-processing">
-                                <div class="card-body">
-                                    <h5 class="card-title">Processing</h5>
-                                    <p class="card-text h4">4</p>
-                                </div>
-                            </div>
-                        </a>
+                </a>
+            </div>
+        
+            <div class="col-md-3">
+                <a href="{{ route('dashboard.processing') }}">
+                    <div class="card card-processing">
+                        <div class="card-body">
+                            <h5 class="card-title" id="processing">Processing</h5>
+                            <p class="card-text h4">4</p>
+                        </div>
                     </div>
+                </a>
+            </div>
 
-                    <div class="col-md-3">
-                        <a href="{{url('/dashboard/ready') }}">
-                            <div class="card card-ready">
-                                <div class="card-body">
-                                    <h5 class="card-title">Ready</h5>
-                                    <p class="card-text h4">2</p>
-                                </div>
-                            </div>
-                        </a>
+            <div class="col-md-3">
+                <a href="{{ route('dashboard.ready') }}">
+                    <div class="card card-ready">
+                        <div class="card-body">
+                            <h5 class="card-title" id="processing">Ready for Pickup</h5>
+                            <p class="card-text h4">2</p>
+                        </div>
                     </div>
+                </a>
+            </div>
 
-                    <div class="col-md-3">
-                        <a href="{{url('/dashboard/unclaimed') }}">
-                            <div class="card card-completed">
-                                <div class="card-body">
-                                    <h5 class="card-title">Unclaimed</h5>
-                                    <p class="card-text h4">2</p>
-                                </div>
-                            </div>
-                        </a>
+            <div class="col-md-3">
+                <a href="{{ route('dashboard.unclaimed') }}">
+                    <div class="card card-completed">
+                        <div class="card-body">
+                            <h5 class="card-title" id="processing">Unclaimed</h5>
+                            <p class="card-text h4">2</p>
+                        </div>
                     </div>
+                </a>
+            </div>
+    </div>
+
+            <!-- Cards for navigation -->
+            <!-- <div class="cards">
+                <div class="card" id="pending">Pending</div>
+                <div class="card" id="processing">Processing</div>
+                <div class="card" id="ready">Ready for Pickup</div>
+                <div class="card" id="unclaimed">Unclaimed</div>
+            </div> -->
+
+            <!-- Tables (preloaded and hidden initially) -->
+            <!-- <div id="tables-area"> -->
+
+                <!-- Pending Table (hidden initially) -->
+                <!-- <div class="card card-pending nav-card" data-target="pending-table">
+                    <div class="card-body">
+                        <h5 class="card-title">Pending</h5>
+                        <p class="card-text h4">4</p>
+                    </div>
+                </div> -->
+                <!-- Processing Table (hidden initially) -->
+                <!-- <div class="card card-processing nav-card" data-target="processing-table">
+                    <div class="card-body">
+                        <h5 class="card-title">Processing</h5>
+                        <p class="card-text h4">5</p>
+                    </div>
+                </div> -->
+                <!-- Ready Table (hidden initially) -->
+                <!-- <div class="card card-ready nav-card" data-target="ready-table">
+                    <div class="card-body">
+                        <h5 class="card-title">Ready for Pickup</h5>
+                        <p class="card-text h4">3</p>
+                    </div>
+                </div> -->
+
+                <!-- Unclaimed Table (hidden initially) -->
+                <!-- <div class="card card-completed nav-card" data-target="unclaimed-table">
+                    <div class="card-body">
+                        <h5 class="card-title">Unclaimed</h5>
+                        <p class="card-text h4">2</p>
+                    </div>
+                </div>
+
+            </div> -->
+
+            <div id="tables-area">
+                <div id="pending-table" class="table-section" style="display: none;">
+                    @include('partials.pending-table')
+                </div>
+
+                <div id="processing-table" class="table-section" style="display: none;">
+                    @include('partials.processing-table')
+                </div>
+
+                <div id="ready-table" class="table-section" style="display: none;">
+                    @include('partials.ready-table')
+                </div>
+
+                <div id="unclaimed-table" class="table-section" style="display: none;">
+                    @include('partials.unclaimed-table')
+                </div>
             </div>
 
             <div class="dynamic-area">
@@ -86,87 +145,12 @@
                 @endif
             </div>
 
-            <!-- <div class="dynamic-area"> 
-                <div class="d-flex-space mb-4">
-                    <div class="card flex-grow-1 me-4">
-                        <div class="card-header">
-                            <h5 class="mb-0">Orders</h5>
-                        </div>
-                        <div class="card-body">
-                            <div class="table-responsive">
-                                <table class="table table-striped">
-                                    <thead>
-                                        <tr>
-                                            <th>SERVICE NUMBER</th>
-                                            <th>Status</th>
-                                            <th>Date and Time Picked Up</th>
-                                            <th>Grand Total</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr>
-                                            <td>WIN001</td>
-                                            <td><span class="status-badge badge-completed">Completed</span></td>
-                                            <td>04/11/25 16:00</td>
-                                            <td>450.00</td>
-                                        </tr>
-                                        <tr>
-                                            <td>WIN002</td>
-                                            <td><span class="status-badge badge-ready">Ready for Pickup</span></td>
-                                            <td></td>
-                                            <td>150.00</td>
-                                        </tr>
-                                        <tr>
-                                            <td>WIN003</td>
-                                            <td><span class="status-badge badge-ready">Ready for Pickup</span></td>
-                                            <td></td>
-                                            <td>600.00</td>
-                                        </tr>
-                                        <tr>
-                                            <td>WIN004</td>
-                                            <td><span class="status-badge badge-processing">In Progress</span></td>
-                                            <td></td>
-                                            <td>300.00</td>
-                                        </tr>
-                                        <tr>
-                                            <td>WIN005</td>
-                                            <td><span class="status-badge badge-processing">In Progress</span></td>
-                                            <td></td>
-                                            <td>550.00</td>
-                                        </tr>
-                                        <tr>
-                                            <td>WIN006</td>
-                                            <td><span class="status-badge badge-processing">In Progress</span></td>
-                                            <td></td>
-                                            <td>520.00</td>
-                                        </tr>
-                                        <tr>
-                                            <td>WIN007</td>
-                                            <td><span class="status-badge badge-pending">Pending</span></td>
-                                            <td></td>
-                                            <td>240.00</td>
-                                        </tr>
-                                        <tr>
-                                            <td>WIN008</td>
-                                            <td><span class="status-badge badge-pending">Pending</span></td>
-                                            <td></td>
-                                            <td>150.00</td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-
-                <div class="circle-card">
-                    <div>
-                        <div> Total Earnings: </div>
-                        <div class="h4">1,600.00</div>
-                    </div>
-                </div> -->
-
                 <div class="dynamic-content">
                     @yield('dynamic-content')
+                </div>
+
+                <div class="container">
+                    @yield('content')
                 </div>
         </div>
 
@@ -187,6 +171,18 @@
             alert("Logging out...");
         }
     </script>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<script>
+$(document).ready(function() {
+    $(".nav-card").click(function() {
+        var target = $(this).data('target');
+        $(".table-section").hide();
+        $("#" + target).fadeIn();
+    });
+});
+</script>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
