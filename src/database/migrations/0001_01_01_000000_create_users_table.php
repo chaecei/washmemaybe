@@ -13,9 +13,11 @@ return new class extends Migration
     {
         Schema::create('users', function (Blueprint $table) {
             $table->id();                            // Auto-incrementing primary key
-            $table->string('name');                  // Name column that will store first_name + last_name
+            $table->string('first_name');
+            $table->string('last_name');
             $table->string('email')->unique();       // Unique email
             $table->string('password');              // Hashed password
+            $table->string('profile_pictures')->nullable();
             $table->timestamps();                    // Timestamps
         });
 

@@ -17,8 +17,8 @@ class RegisterController extends Controller
     public function register(Request $request)
 {
     $validator = Validator::make($request->all(), [
-        'first_name' => 'required|string|max:255',
-        'last_name' => 'required|string|max:255',
+        'first_name' => 'required|string|max:100',
+        'last_name' => 'required|string|max:100',
         'email' => 'required|string|email|max:255|unique:users',
         'password' => 'required|string|min:8|confirmed',
     ]);
@@ -28,11 +28,12 @@ class RegisterController extends Controller
     }
 
     // Combine first and last name
-    $fullName = $request->first_name . ' ' . $request->last_name;
+    // $fullName = $request->first_name . ' ' . $request->last_name;
 
     // Create the user
     User::create([
-        'name' => $fullName, // 🔴 Make sure this line is here!
+        'first_name' => $request->first_name,
+        'last_name' => $request->last_name,
         'email' => $request->email,
         'password' => Hash::make($request->password),
     ]);
