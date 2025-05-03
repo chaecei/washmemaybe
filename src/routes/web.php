@@ -25,6 +25,9 @@ Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 Route::middleware(['auth'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
+    // Notifications panel
+    Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications');
+
     // Account settings
     Route::get('/account/settings', [AccountController::class, 'showSettings'])->name('account.settings');
     Route::post('/account/update-info', [AccountController::class, 'updateInfo'])->name('account.updateInfo');
@@ -34,6 +37,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/services', [ServiceController::class, 'showServices'])->name('services');
     Route::post('/store-user', [ServiceController::class, 'storeCustomer'])->name('storeCustomer');
     Route::post('/store-order', [ServiceController::class, 'storeOrder'])->name('storeOrder');
+
 
     // Category Tables
     // Route::get('/dashboard/pending', [DashboardController::class, 'categories'])->name('dashboard.pending');

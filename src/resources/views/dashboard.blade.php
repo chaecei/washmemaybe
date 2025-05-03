@@ -8,6 +8,7 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link rel="stylesheet" href="{{ asset('css/dashboard.css') }}">
 </head>
+
 <body>
     <div class="sidebar">
         <ul>
@@ -15,7 +16,7 @@
           <li><a href="{{ route('services') }}" class="nav-link services-link {{ request()->routeIs('services') ? 'active' : '' }}">Services</a></li>
           <li><a href="redirect(history.html)" class="nav-link {{ request()->routeIs('history') ? 'active' : '' }}">History</a></li>
           <li><a href="redirect(expenses.html)" class="nav-link {{ request()->routeIs('expenses') ? 'active' : '' }}">Expenses</a></li>
-          <li><a href="redirect(notification.html)" class="nav-link {{ request()->routeIs('notifications') ? 'active' : '' }}">Notification</a></li>
+          <li><a href="{{ route('notifications') }}" class="nav-link notifications-link {{ request()->routeIs('notifications') ? 'active' : '' }}">Notification</a></li>
           <li><a href="{{ route('account.settings') }}" class="nav-link account-link {{ request()->routeIs('account.settings') ? 'active' : '' }}">Account Information</a></li>
           <li>
             <a href="#" class="logout-link no-hover" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
@@ -160,44 +161,6 @@
             </div>
         </div>
     </div>
-
-        <!-- Pending Modal -->
-    <!-- <div class="modal fade" id="pendingModal" tabindex="-1" aria-labelledby="pendingModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-xl">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Pending Orders</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-
-                    <table class="table table-bordered">
-                        <thead>
-                            <tr>
-                                <th>Service Number</th>
-                                <th>Status</th>
-                                <th>Date and Time Picked Up</th>
-                                <th>Grand Total</th>
-                                <th>Action</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach ($categories as $category)
-                                <tr>
-                                    <td>{{ $category->service_number }}</td>
-                                    <td>{{ $category->status }}</td>
-                                    <td>{{ number_format($category->grand_total, 2) }}</td>
-                                    <td>{{ $category->created_at->format('m-d-y') }}</td>
-                                    <td>{{ $category->updated_at->format('m-d-y') }}</td>
-                                </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
-
-                </div>
-            </div>
-        </div>
-    </div> -->
 
 
     <script>

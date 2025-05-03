@@ -1,0 +1,39 @@
+for dashboard pending logic
+
+        <!-- Pending Modal -->
+    <!-- <div class="modal fade" id="pendingModal" tabindex="-1" aria-labelledby="pendingModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Pending Orders</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+
+                    <table class="table table-bordered">
+                        <thead>
+                            <tr>
+                                <th>Service Number</th>
+                                <th>Status</th>
+                                <th>Date and Time Picked Up</th>
+                                <th>Grand Total</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach ($categories as $category)
+                                <tr>
+                                    <td>{{ $category->service_number }}</td>
+                                    <td>{{ $category->status }}</td>
+                                    <td>{{ number_format($category->grand_total, 2) }}</td>
+                                    <td>{{ $category->created_at->format('m-d-y') }}</td>
+                                    <td>{{ $category->updated_at->format('m-d-y') }}</td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+
+                </div>
+            </div>
+        </div>
+    </div> -->
