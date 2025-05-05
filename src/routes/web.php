@@ -24,6 +24,7 @@ Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 // Protected Routes
 Route::middleware(['auth'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+
     Route::get('/category/{status}', [CategoryController::class, 'getByStatus']);
     
     // Notifications panel
@@ -36,9 +37,13 @@ Route::middleware(['auth'])->group(function () {
 
     // Services and Orders
     Route::get('/services', [ServiceController::class, 'showServices'])->name('services');
-    Route::post('/store-user', [ServiceController::class, 'storeCustomer'])->name('storeCustomer');
-    Route::post('/store-order', [ServiceController::class, 'storeOrder'])->name('storeOrder');
+    Route::post('/orders/store', [ServiceController::class, 'storeOrder'])->name('storeOrder');
+    Route::put('/orders/{order}/status', [ServiceController::class, 'updateStatus'])->name('orders.update-status');
+    Route::post('/services/store', [ServiceController::class, 'store'])->name('service.store');
+    Route::post('/payment/{order}', [ServiceController::class, 'storePayment'])->name('payment.store');
+    Route::get('/service/{orderId}', [ServiceController::class, 'showServiceOrder']);
 
+    // Route::resource('services', ServiceController::class);
 
     // Category Tables
     // Route::get('/dashboard/pending', [DashboardController::class, 'categories'])->name('dashboard.pending');

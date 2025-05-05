@@ -14,7 +14,8 @@ class Customer extends Model
 
     // Fields that are mass assignable
     protected $fillable = [
-        'full_name',
+        'first_name',
+        'last_name',
         'mobile_number',
         'email',
     ];

@@ -7,6 +7,11 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link rel="stylesheet" href="{{ asset('css/dashboard.css') }}">
+    <!-- Toastify CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+
+    <!-- Toastify JS -->
+    <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
 </head>
 <body>
     <style>
@@ -108,7 +113,7 @@
           <li><a href="{{ route('services') }}" class="nav-link services-link {{ request()->routeIs('services') ? 'active' : '' }}">Services</a></li>
           <li><a href="redirect(history.html)" class="nav-link {{ request()->routeIs('history') ? 'active' : '' }}">History</a></li>
           <li><a href="redirect(expenses.html)" class="nav-link {{ request()->routeIs('expenses') ? 'active' : '' }}">Expenses</a></li>
-          <li><a href="redirect(notification.html)" class="nav-link {{ request()->routeIs('notifications') ? 'active' : '' }}">Notification</a></li>
+          <li><a href="{{ route('notifications') }}" class="nav-link {{ request()->routeIs('notifications') ? 'active' : '' }}">Notification</a></li>
           <li><a href="#" onclick="openAccountModal()" id="accountLink" class="nav-link">Account Information</a></li>
           <li>
             <a href="#" class="logout-link no-hover" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
@@ -154,17 +159,7 @@
 
                     <button type="submit" class="btn-custom mt-3">Confirm</button>
                 </form>
-
-                @if ($errors->any())
-                    <div class="alert alert-danger">
-                        <ul>
-                            @foreach ($errors->all() as $error)
-                                <li>{{ $error }}</li>
-                            @endforeach
-                        </ul>
-                    </div>
-                @endif
-
+                
                 <!-- Password Change Section -->
                 <div class="section-title mt-4">Account Settings</div>
                 <div class="subsection-title">Password Change</div>
@@ -179,20 +174,42 @@
 
                     <!-- Display success message -->
                     @if(session('success'))
-                        <div class="alert alert-success">
-                            {{ session('success') }}
-                        </div>
+                    <script>
+                        Toastify({
+                            text: "{{ session('success') }}",
+                            duration: 3000,
+                            close: true,
+                            gravity: "top",
+                            position: "center",
+                            backgroundColor: "#28a745",
+                        }).showToast();
+                    </script>
                     @endif
 
                     <!-- Display validation errors -->
-                     @if ($errors->any())
-                        <div class="alert alert-danger">
-                            <ul>
-                                @foreach ($errors->all() as $error)
-                                    <li>{{ error }}</li>
-                                @endforeach
-                            </ul>
-                        </div>
+                    @if ($errors->any())
+                        <script>
+                            @foreach ($errors->all() as $error)
+                                Toastify({
+                                    text: "{{ $error }}",
+                                    duration: 5000,  // Longer duration for errors
+                                    close: true,
+                                    gravity: "top",
+                                    position: "center",  // Matches success position
+                                    backgroundColor: "#dc3545",  // Bootstrap's danger red
+                                    offset: {
+                                        y: 50  // Stacks below success messages
+                                    },
+                                    ariaLive: "polite",  // Accessibility
+                                    className: "toastify-error",  // For custom styling
+                                    style: {
+                                        boxShadow: "none",
+                                        fontSize: "14px",
+                                        fontWeight: "500"
+                                    }
+                                }).showToast();
+                            @endforeach
+                        </script>
                     @endif
 
                 <div class="form-group mt-5">

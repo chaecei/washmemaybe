@@ -16,6 +16,12 @@ class Category extends Model
         'service_number',
         'status',
         'grand_total',
-        'days_unclaimed'
+        'days_unclaimed',
+        'name',
     ];
+
+    public function orders()
+    {
+        return $this->hasMany(Order::class);
+    }
 }

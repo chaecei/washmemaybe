@@ -90,7 +90,7 @@
             </div>
             <div class="card-body">
                 <div class="table-responsive">
-                    <table class="table table-striped">
+                    <table class="table table-striped" id="ordersTable">
                         <thead>
                             <tr>
                                 <th>SERVICE NUMBER</th>
@@ -100,54 +100,20 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <tr>
-                                <td>WIN001</td>
-                                <td><span class="status-badge badge-completed">Completed</span></td>
-                                <td>04/11/25 16:00</td>
-                                <td>450.00</td>
-                            </tr>
-                            <tr>
-                                <td>WIN002</td>
-                                <td><span class="status-badge badge-ready">Ready for Pickup</span></td>
-                                <td></td>
-                                <td>150.00</td>
-                            </tr>
-                            <tr>
-                                <td>WIN003</td>
-                                <td><span class="status-badge badge-ready">Ready for Pickup</span></td>
-                                <td></td>
-                                <td>600.00</td>
-                            </tr>
-                            <tr>
-                                <td>WIN004</td>
-                                <td><span class="status-badge badge-processing">In Progress</span></td>
-                                <td></td>
-                                <td>300.00</td>
-                            </tr>
-                            <tr>
-                                <td>WIN005</td>
-                                <td><span class="status-badge badge-processing">In Progress</span></td>
-                                <td></td>
-                                <td>550.00</td>
-                            </tr>
-                            <tr>
-                                <td>WIN006</td>
-                                <td><span class="status-badge badge-processing">In Progress</span></td>
-                                <td></td>
-                                <td>520.00</td>
-                            </tr>
-                            <tr>
-                                <td>WIN007</td>
-                                <td><span class="status-badge badge-pending">Pending</span></td>
-                                <td></td>
-                                <td>240.00</td>
-                            </tr>
-                            <tr>
-                                <td>WIN008</td>
-                                <td><span class="status-badge badge-pending">Pending</span></td>
-                                <td></td>
-                                <td>150.00</td>
-                            </tr>
+                            @foreach($orders as $order)
+                              <tr>
+                                  <td>{{ $order->id }}</td>
+                                  <td>{{ $order->category->name ?? 'Pending' }}</td>
+                                  <td>{{ $order->picked_up_at ? $order->picked_up_at->format('M d, Y h:i A') : 'Not yet picked up' }}</td>
+                                  <td>
+                                      @php
+                                          $pricePerLoad = 50; // you can later move this to config or DB
+                                          $grandTotal = $order->total_load * $pricePerLoad;
+                                      @endphp
+                                      ₱{{ number_format($grandTotal, 2) }}
+                                  </td>
+                              </tr>
+                            @endforeach
                         </tbody>
                     </table>
                 </div>
@@ -191,7 +157,106 @@
     });
     </script>
 
+<script>
+  // Handle status changes from other tables
+  function updateDashboard(orderData) {
+      const row = document.querySelector(`tr[data-order-id="${orderData.id}"]`);
+      
+      if (!row) {
+          // Add new row at top if not exists
+          const tbody = document.querySelector('#ordersTable tbody');
+          tbody.insertAdjacentHTML('afterbegin', `
+              <tr data-order-id="${orderData.id}">
+                  <td>${orderData.service_number}</td>
+                  <td><span class="status-badge badge-${orderData.status.replace(' ', '')}">
+                      ${orderData.status.charAt(0).toUpperCase() + orderData.status.slice(1)}
+                  </span></td>
+                  <td>${new Date(orderData.updated_at).toLocaleString()}</td>
+                  <td>${orderData.picked_up_at ? new Date(orderData.picked_up_at).toLocaleString() : '-'}</td>
+                  <td>₱${orderData.grand_total.toFixed(2)}</td>
+              </tr>
+          `);
+      } else {
+          // Update existing row
+          row.querySelector('.status-badge').className = `status-badge badge-${orderData.status.replace(' ', '')}`;
+          row.querySelector('.status-badge').textContent = 
+              orderData.status.charAt(0).toUpperCase() + orderData.status.slice(1);
+          row.cells[2].textContent = new Date(orderData.updated_at).toLocaleString();
+          row.cells[3].textContent = orderData.picked_up_at ? 
+              new Date(orderData.picked_up_at).toLocaleString() : '-';
+      }
+  }
 
+  // Listen for updates (using Pusher or Echo for real-time)
+  Echo.channel('order-updates')
+      .listen('OrderStatusUpdated', (data) => {
+          updateDashboard(data.order);
+      });
+</script>
+
+<script>
+  async function updateOrderStatus(orderId, newStatus) {
+      try {
+          const response = await fetch(`/orders/${orderId}/status`, {
+              method: 'PUT',
+              headers: {
+                  'Content-Type': 'application/json',
+                  'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+              },
+              body: JSON.stringify({ status: newStatus })
+          });
+
+          const data = await response.json();
+          
+          if (data.success) {
+              // Update UI or let the real-time event handle it
+              console.log('Status updated:', data.order);
+          }
+      } catch (error) {
+          console.error('Error:', error);
+      }
+  }
+
+  // Example usage (attach this to your status dropdowns):
+  document.querySelectorAll('.status-dropdown').forEach(dropdown => {
+      dropdown.addEventListener('change', function() {
+          const orderId = this.dataset.orderId;
+          const newStatus = this.value;
+          updateOrderStatus(orderId, newStatus);
+      });
+  });
+</script>
+
+<script>
+  window.Echo.channel('order-updates')
+    .listen('OrderStatusUpdated', (data) => {
+        // Find and update the row or prepend a new one
+        const row = document.querySelector(`tr[data-order-id="${data.order.id}"]`);
+        
+        if (row) {
+            // Update existing row
+            row.querySelector('.status-badge').className = `status-badge badge-${data.order.status}`;
+            row.querySelector('.status-badge').textContent = data.order.status;
+            row.cells[2].textContent = new Date(data.order.updated_at).toLocaleString();
+            row.cells[3].textContent = data.order.picked_up_at 
+                ? new Date(data.order.picked_up_at).toLocaleString() 
+                : '-';
+        } else {
+            // Add new row at top
+            document.querySelector('#ordersTable tbody').insertAdjacentHTML('afterbegin', `
+                <tr data-order-id="${data.order.id}">
+                    <td>${data.order.service_number}</td>
+                    <td><span class="status-badge badge-${data.order.status}">
+                        ${data.order.status}
+                    </span></td>
+                    <td>${new Date(data.order.updated_at).toLocaleString()}</td>
+                    <td>${data.order.picked_up_at ? new Date(data.order.picked_up_at).toLocaleString() : '-'}</td>
+                    <td>₱${data.order.grand_total.toFixed(2)}</td>
+                </tr>
+            `);
+        }
+    });
+</script>
   <!-- Pending Card Table -->
   <script>
   document.addEventListener('DOMContentLoaded', function () {

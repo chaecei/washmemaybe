@@ -16,6 +16,7 @@ return new class extends Migration
             $table->string('service_number'); // Service number field
             $table->string('status'); // Status field
             $table->decimal('grand_total', 10, 2); // Grand total field with two decimal places
+            $table->string('name');
             $table->timestamps();
         });
     }

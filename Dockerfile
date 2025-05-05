@@ -12,5 +12,8 @@ RUN curl -sS https://getcomposer.org/installer | php && \
 # Allow FPM to listen on all interfaces
 RUN sed -i 's|listen = 127.0.0.1:9000|listen = 0.0.0.0:9000|' /usr/local/etc/php-fpm.d/www.conf
 
+RUN chown -R www-data:www-data /var/www/storage \
+    && chmod -R 775 /var/www/storage
+
 # Set working directory
 WORKDIR /var/www

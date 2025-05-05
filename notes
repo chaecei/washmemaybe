@@ -37,3 +37,74 @@ for dashboard pending logic
             </div>
         </div>
     </div> -->
+
+
+
+
+
+
+    script from services blade
+
+    <script>
+        function addOrder() {
+            const orderTemplate = `
+            <div class="order-block">
+                <input type="hidden" name="orders[][customer_id]" value="">
+                <input type="radio" name="orders[][service_type]" value="Wash and Fold" required>
+                <!-- other fields -->
+            </div>`;
+            document.getElementById('orderContainer').insertAdjacentHTML('beforeend', orderTemplate);
+        }
+
+        // Handle form submission
+        document.querySelector('form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            // Add AJAX submission or let form submit normally
+        });
+    </script>
+
+    <script>
+        let orderCount = 0;
+
+        function addOrder() {
+            orderCount++;
+            const container = document.getElementById('orderContainer');
+            const template = document.getElementById('orderTemplate');
+            const clone = template.content.cloneNode(true);
+
+            const orderBlock = clone.querySelector('.order-block');
+            const serviceRadios = clone.querySelectorAll('.service-type');
+            const totalLoadGroup = clone.querySelector('.total-load-group');
+            const detergentGroup = clone.querySelector('.detergent-group');
+            const softenerGroup = clone.querySelector('.softener-group');
+            const orderNumberSpan = clone.querySelector('.order-number');
+
+            orderNumberSpan.textContent = orderCount;
+
+            // Unique radio group per order
+            serviceRadios.forEach((radio) => {
+            radio.name = `serviceType${orderCount}`;
+            radio.addEventListener('change', () => {
+                totalLoadGroup.classList.remove('hidden');
+            });
+            });
+
+            clone.querySelector('.total-load').addEventListener('input', function () {
+            if (this.value > 0) {
+                detergentGroup.classList.remove('hidden');
+            } else {
+                detergentGroup.classList.add('hidden');
+                softenerGroup.classList.add('hidden');
+            }
+            });
+
+            clone.querySelector('.detergent').addEventListener('change', () => {
+            softenerGroup.classList.remove('hidden');
+            });
+
+            container.appendChild(clone);
+        }
+
+        // Load first order by default
+        window.onload = addOrder;
+    </script>

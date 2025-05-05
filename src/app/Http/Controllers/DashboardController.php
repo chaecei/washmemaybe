@@ -4,19 +4,17 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Category;
+use App\Models\Order;
 
 class DashboardController extends Controller
 {
     public function index()
     {
-        return view('dashboard');
+        $orders = Order::with('category')->get(); // Eager load the category relation
+        return view('dashboard', compact('orders')); // Pass the orders to the view
     }
 
-    // Fetch and show 'Pending' categories
-    // public function pendingTable()
-    // {
-    //     $pendingCategories = Category::where('status', 'Pending')->get();
-    //     return view('dashboard', compact('pendingCategories'));
-    // }
+
+
 }
 

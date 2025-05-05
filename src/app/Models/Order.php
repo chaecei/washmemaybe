@@ -15,10 +15,12 @@ class Order extends Model
     // Fields that are mass assignable
     protected $fillable = [
         'customer_id', // Foreign key that links to the customer
+        'category_id',
         'service_type',
         'total_load',
         'detergent',
         'softener',
+        'category_id',
     ];
 
     /**
@@ -27,5 +29,10 @@ class Order extends Model
     public function customer()
     {
         return $this->belongsTo(Customer::class); // Each order belongs to a customer
+    }
+
+    public function category()
+    {
+        return $this->belongsTo(Category::class);
     }
 }

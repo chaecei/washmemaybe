@@ -140,14 +140,18 @@ a {
     color: #386641;
 }
 .status-badge {
-    padding: 5px 10px;
-    border-radius: 20px;
-    font-size: 0.9rem;
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: capitalize;
 }
-.badge-pending { background-color: #C6E7FF; color: #000; }
-.badge-processing { background-color: #023e8a; color: #fff; }
-.badge-ready { background-color: #F0A04B; color: #fff; }
-.badge-completed { background-color: #6c757d; color: #fff; }
+
+.badge-pending { background-color: #ffecb5; color: #7a5f00; }
+.badge-processing { background-color: #b3e0ff; color: #005b9f; }
+.badge-ready { background-color: #c8f7c5; color: #1a5e1a; }
+.badge-completed { background-color: #e0e0e0; color: #424242; }
+.badge-unclaimed { background-color: #ffcdd2; color: #c62828; }
 
 .circle-card {
     width: 200px;
