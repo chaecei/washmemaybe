@@ -57,13 +57,13 @@ class AccountController extends Controller
 
         //Check if old password is correct
         if(!Hash::check($request->old_password, $user->password)) {
-            return back()->withErrors(['old_password' => 'Old password is incorrect']);
+            return back()->withErrors(['old_password' => 'The provided password does not match your current password.']);
         }
 
-        $user->password = Hash::make($request->new_password);
-        $user->last_password_change = now(); //update the date when password was last changed
+        // Update the user's password
+        $user->password = Hash::make($request->new_password);  // Hash the new password before storing it
         $user->save();
 
-        return back()->with('success', 'Password changed succesfully!');
+        return redirect()->route('dashboard')->with('success', 'Password successfully updated!');
     }
 }

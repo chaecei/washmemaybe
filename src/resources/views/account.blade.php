@@ -46,14 +46,21 @@
             margin-bottom: 15px;
         }
         .btn-custom {
-            border: 1px solid black;
             border-radius: 10px;
             padding: 5px 20px;
-            box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
-            background-color: white;
+            background-color: #578FCA;
+            border: none;
+            transition: background-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
+            box-shadow: 0 4px 6px rgba(128, 128, 128, 0.3); /* bottom-only gray shadow */
+        }
+        .btn-custom:hover {
+            background-color: #4176ad; /* Slightly darker shade */
+            transform: translateY(-2px); /* Subtle lift effect */
+            box-shadow: 3px 3px 10px rgba(0, 0, 0, 0.25); /* Softer and deeper shadow */
         }
         .section-title {
             margin-top: 40px;
+            margin-bottom: 30px;
             font-weight: bold;
             font-size: 24px;
         }
@@ -66,6 +73,32 @@
             display: block;
             margin: 20px auto;
         }
+        /* .modal-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+        } */
+        /* .modal-container.active {
+            display: flex;
+        }
+        .modal-content {
+            background: white;
+            border-radius: 15px;
+            padding: 40px;
+            width: 90%;
+            max-width: 700px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            overflow-y: auto;
+            max-height: 90vh;
+            position: relative;
+        } */
 
     </style>
 
@@ -106,6 +139,7 @@
             <div class="modal-content">
     
                 <!-- Account Information -->
+                <div class="section-title">Account Information</div>
                 <form action="{{ route('account.updateInfo') }}" method="POST" enctype="multipart/form-data">
                     @csrf
                     <input type="text" class="form-control" name="first_name" placeholder="First Name"
@@ -119,13 +153,6 @@
                     <input type="file" class="form-control" id="profilePicture" name="profile_picture">
 
                     <button type="submit" class="btn-custom mt-3">Confirm</button>
-
-                    <div class="section-title">Other Information</div>
-                    <!-- <select class="form-select" name="status">
-                        <option value="Active">Active</option>
-                        <option value="Inactive">Inactive</option>
-                    </select> -->
-                    <input type="text" class="form-control" placeholder="Last Password Change Date" readonly>
                 </form>
 
                 @if ($errors->any())
@@ -143,11 +170,39 @@
                 <div class="subsection-title">Password Change</div>
                 <form action="{{ route('account.changePassword') }}" method="POST">
                     @csrf
-                    <input type="password" class="form-control" name="old_password" placeholder="Enter Old Password">
-                    <input type="password" class="form-control" name="new_password" placeholder="Enter New Password">
-                    <input type="password" class="form-control" name="new_password_confirmation" placeholder="Re-enter New Password">
+
+                    <input type="password" class="form-control" name="old_password" placeholder="Enter Old Password" required>
+                    <input type="password" class="form-control" name="new_password" placeholder="Enter New Password" required>
+                    <input type="password" class="form-control" name="new_password_confirmation" placeholder="Re-enter New Password" required>
                     <button type="submit" class="btn-custom mt-3">Update Password</button>
                 </form>
+
+                    <!-- Display success message -->
+                    @if(session('success'))
+                        <div class="alert alert-success">
+                            {{ session('success') }}
+                        </div>
+                    @endif
+
+                    <!-- Display validation errors -->
+                     @if ($errors->any())
+                        <div class="alert alert-danger">
+                            <ul>
+                                @foreach ($errors->all() as $error)
+                                    <li>{{ error }}</li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    @endif
+
+                <div class="form-group mt-5">
+                    <!-- <label class="form-label">Last Update:</label> -->
+                    <div class="alert alert-info" role="alert">
+                        Last updated on {{ auth()->user()->updated_at->format('F d, Y \a\t h:i A') }}
+                    </div>
+                </div>
+
+
             </div>
         </div>
 

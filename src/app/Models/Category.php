@@ -11,4 +11,11 @@ class Category extends Model
 
     // Specify the table name if it doesn't follow Laravel's pluralization rule
     protected $table = 'category'; 
+
+    protected $fillable = [
+        'service_number',
+        'status',
+        'grand_total',
+        'days_unclaimed'
+    ];
 }

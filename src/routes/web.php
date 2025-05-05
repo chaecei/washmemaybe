@@ -7,7 +7,7 @@ use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\AccountController;
 use App\Http\Controllers\ServiceController;
-
+use App\Http\Controllers\CategoryController;
 
 // Redirect root to register page
 Route::redirect('/', '/register');
@@ -24,7 +24,8 @@ Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 // Protected Routes
 Route::middleware(['auth'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
-
+    Route::get('/category/{status}', [CategoryController::class, 'getByStatus']);
+    
     // Notifications panel
     Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications');
 
