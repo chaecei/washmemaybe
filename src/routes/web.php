@@ -8,6 +8,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\AccountController;
 use App\Http\Controllers\ServiceController;
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\PaymentController;
 
 // Redirect root to register page
 Route::redirect('/', '/register');
@@ -40,8 +41,19 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/orders/store', [ServiceController::class, 'storeOrder'])->name('storeOrder');
     Route::put('/orders/{order}/status', [ServiceController::class, 'updateStatus'])->name('orders.update-status');
     Route::post('/services/store', [ServiceController::class, 'store'])->name('service.store');
-    Route::post('/payment/{order}', [ServiceController::class, 'storePayment'])->name('payment.store');
+    
     Route::get('/service/{orderId}', [ServiceController::class, 'showServiceOrder']);
+    Route::get('/services/{id}', [ServiceController::class, 'show'])->name('services.show');
+
+
+    Route::get('/payment/{id}', [PaymentController::class, 'showPayment'])->name('payment.show');
+    Route::post('/payment/{order}', [ServiceController::class, 'storePayment'])->name('payment.store');
+
+
+    // Define the route for order history
+    Route::get('history', [ServiceController::class, 'orderHistory'])->name('history');
+
+    Route::get('expenses', [ServiceController::class, 'showExpenses'])->name('expenses');
 
     // Route::resource('services', ServiceController::class);
 

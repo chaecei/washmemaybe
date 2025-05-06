@@ -31,9 +31,9 @@
         }
 
         .btn-pastel {
-        background-color: #AFDDFF;
+        background-color: #60B5FF;
         color: #000;
-        border: none;
+        border: 'none';
         }
 
         .btn-pastel:hover {
@@ -62,12 +62,24 @@
 
     <div class="sidebar">
         <ul>
-            <li><a href="{{ route('dashboard') }}" class="nav-link {{ request()->routeIs('dashboard') ? 'active' : '' }}">Dashboard</a></li>
-            <li><a href="{{ route('services') }}" class="nav-link services-link {{ request()->routeIs('services') ? 'active' : '' }}">Services</a></li>
-            <li><a href="redirect(history.html)" class="nav-link {{ request()->routeIs('history') ? 'active' : '' }}">History</a></li>
-            <li><a href="redirect(expenses.html)" class="nav-link {{ request()->routeIs('expenses') ? 'active' : '' }}">Expenses</a></li>
-            <li><a href="{{ route('notifications') }}" class="nav-link {{ request()->routeIs('notifications') ? 'active' : '' }}">Notification</a></li>
-            <li><a href="{{ route('account.settings') }}" class="nav-link account-link {{ request()->routeIs('account.settings') ? 'active' : '' }}">Account Information</a></li>
+        <li class="{{ request()->routeIs('dashboard') ? 'active' : '' }}">
+            <a href="{{ route('dashboard') }}" class="nav-link">Dashboard</a>
+        </li>
+        <li class="{{ request()->routeIs('services') ? 'active' : '' }}">
+            <a href="{{ route('services') }}" class="nav-link">Services</a>
+        </li>
+        <li class="{{ request()->routeIs('history') ? 'active' : '' }}">
+            <a href="{{ route('history') }}" class="nav-link">History</a>
+        </li>
+        <li class="{{ request()->routeIs('expenses') ? 'active' : '' }}">
+            <a href="{{ route('expenses') }}" class="nav-link">Expenses</a>
+        </li>
+        <li class="{{ request()->routeIs('notifications') ? 'active' : '' }}">
+            <a href="{{ route('notifications') }}" class="nav-link">Notifications</a>
+        </li>
+        <li class="{{ request()->routeIs('account.settings') ? 'active' : '' }}">
+            <a href="{{ route('account.settings') }}" class="nav-link">Account Information</a>
+        </li>
             <li>
                 <a href="#" class="logout-link no-hover" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
                 Logout
@@ -102,7 +114,7 @@
                     <!-- Add User Form -->
                     <div class="col-12">
                         <div class="form-container">
-                            <h5 class="mb-3">Add User</h5>
+                            <h5 class="mb-3">Add Customer Information</h5>
                             <div class="mb-3">
                                 <label class="form-label">First Name</label>
                                 <input type="text" name="first_name" class="form-control" placeholder="Enter name" required />
@@ -130,7 +142,7 @@
                             <input type="hidden" name="orders[]" id="orderData" />
                             <div class="text-end mt-3">
                                 <button type="button" class="btn btn-outline-secondary me-2" onclick="addOrder()">+ Add Order</button>
-                                <button type="submit" class="btn btn-pastel">Submit Service</button>
+                                <button type="submit" class="btn btn-pastel" id="submitOrderBtn">Submit Service</button>
                             </div>
                         </div>
                     </div>
@@ -152,10 +164,6 @@
                         <div class="form-check form-check-inline">
                             <input class="form-check-input service-type" type="radio" value="Wash and Iron" />
                             <label class="form-check-label">Wash and Iron</label>
-                        </div>
-                        <div class="form-check form-check-inline">
-                            <input class="form-check-input service-type" type="radio" value="Dry Clean" />
-                            <label class="form-check-label">Dry Clean</label>
                         </div>
                     </div>
 
@@ -193,77 +201,50 @@
         </form>
 
 
-<!-- Service Order Details -->
-<div class="container">
-    <h2>Service Order Submitted</h2>
-    <p>Service Number: {{ $order->id }}</p>
-    <p>Status: {{ $order->category->name ?? 'Unknown' }}</p>
-    <p>Total Load: {{ $order->total_load }} kg</p>
-    <p>Service Type: {{ $order->service_type }}</p>
-    <p>Grand Total: ₱{{ number_format($order->total_load * 50, 2) }}</p> <!-- Assuming ₱50 per load -->
+        <div class="modal fade" id="orderSummaryModal" tabindex="-1" aria-labelledby="orderSummaryModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                
+                <div class="modal-header">
+                    <h5 class="modal-title" id="orderSummaryModalLabel">Order Submitted!</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                
+                <div class="modal-body">
+                    <p>Your service order has been successfully submitted.</p>
+                </div>
+                
+                <div class="modal-footer">
+                    <a href="{{ route('payment.show', ['id' => $order->id ?? 0]) }}" class="btn btn-primary">
+                    Proceed to Payment
+                    </a>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+                
+                </div>
+            </div>
+        </div>
 
-    <!-- Button to trigger the payment modal -->
-    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#paymentModal">
-        Proceed to Payment
-    </button>
-</div>
+
 
 <!-- Include Bootstrap JS and jQuery for Modal Functionality -->
 <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
 
-<!-- Modal Script -->
 <script>
-    $(document).ready(function(){
-        // Dynamically create the modal
-        const modalHTML = `
-            <div class="modal fade" id="paymentModal" tabindex="-1" role="dialog" aria-labelledby="paymentModalLabel" aria-hidden="true">
-                <div class="modal-dialog" role="document">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h5 class="modal-title" id="paymentModalLabel">Payment for Service Order #{{ $order->id }}</h5>
-                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                <span aria-hidden="true">&times;</span>
-                            </button>
-                        </div>
-                        <div class="modal-body">
-                            <!-- Payment form -->
-                            <form action="{{ route('payment.store', ['order' => $order->id]) }}" method="POST">
-                                @csrf
-                                <div class="form-group">
-                                    <label for="payment_method">Payment Method</label>
-                                    <select name="payment_method" id="payment_method" class="form-control" required>
-                                        <option value="Cash">Cash</option>
-                                        <option value="Credit Card">Credit Card</option>
-                                        <option value="Online Transfer">Online Transfer</option>
-                                    </select>
-                                </div>
+    document.addEventListener('DOMContentLoaded', function () {
+        const submitBtn = document.getElementById('submitOrderBtn');
+        const modalElement = document.getElementById('orderSummaryModal');
 
-                                <div class="form-group">
-                                    <label for="amount">Amount</label>
-                                    <input type="text" name="amount" id="amount" class="form-control" value="₱{{ number_format($order->total_load * 50, 2) }}" readonly>
-                                </div>
-
-                                <div class="form-group">
-                                    <label for="transaction_id">Transaction ID (Optional)</label>
-                                    <input type="text" name="transaction_id" id="transaction_id" class="form-control" placeholder="Enter transaction ID if available">
-                                </div>
-
-                                <button type="submit" class="btn btn-success">Submit Payment</button>
-                            </form>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        `;
-
-        // Append the modal to the body
-        $('body').append(modalHTML);
-
-        // Activate Bootstrap Modal
-        $('#paymentModal').modal('show');
+        submitBtn.addEventListener('click', function (e) {
+            e.preventDefault();
+            const modal = new bootstrap.Modal(modalElement);
+            modal.show();
+        });
     });
 </script>
+
+
 
     @if(session('success'))
         <div class="alert alert-success">
@@ -429,5 +410,15 @@
     });
 
 </script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        @if(session()->has('customer') || isset($orders))
+            var myModal = new bootstrap.Modal(document.getElementById('paymentModal'));
+            myModal.show();
+        @endif
+    });
+</script>
+
 
 

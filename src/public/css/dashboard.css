@@ -23,9 +23,7 @@ a {
     border-top-right-radius: 20px;
     border-bottom-right-radius: 20px;
 }
-.sidebar-nav .nav-link.active {
-    background-color: #007bff;
-}
+
 .sidebar ul {
     list-style: none;
     padding-left: 0;
@@ -42,11 +40,11 @@ a {
     border-bottom-right-radius: 15px;
 }
 .sidebar li.active {
-    background-color: #86b5ff;
+    background-color: #60B5FF;
     box-shadow: 6px 0 20px rgba(0, 0, 0, 0.2);
     border-top-right-radius: 15px;
     border-bottom-right-radius: 15px;
-    font-weight: bold;  
+    white-space: nowrap ;
 }
 .header-image {
     width: 25%;      /* Makes the image fit the full sidebar width */

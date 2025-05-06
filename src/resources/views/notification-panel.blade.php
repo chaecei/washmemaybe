@@ -11,12 +11,24 @@
 
     <div class="sidebar">
       <ul>
-        <li><a href="{{ route('dashboard') }}" class="nav-link {{ request()->routeIs('dashboard') ? 'active' : '' }}">Dashboard</a></li>
-        <li><a href="{{ route('services') }}" class="nav-link services-link {{ request()->routeIs('services') ? 'active' : '' }}">Services</a></li>
-        <li><a href="redirect(history.html)" class="nav-link {{ request()->routeIs('history') ? 'active' : '' }}">History</a></li>
-        <li><a href="redirect(expenses.html)" class="nav-link {{ request()->routeIs('expenses') ? 'active' : '' }}">Expenses</a></li>
-        <li><a href="{{ route('notifications') }}" class="nav-link {{ request()->routeIs('notifications') ? 'active' : '' }}">Notification</a></li>
-        <li><a href="{{ route('account.settings') }}" class="nav-link account-link {{ request()->routeIs('account.settings') ? 'active' : '' }}">Account Information</a></li>
+      <li class="{{ request()->routeIs('dashboard') ? 'active' : '' }}">
+            <a href="{{ route('dashboard') }}" class="nav-link">Dashboard</a>
+        </li>
+        <li class="{{ request()->routeIs('services') ? 'active' : '' }}">
+            <a href="{{ route('services') }}" class="nav-link">Services</a>
+        </li>
+        <li class="{{ request()->routeIs('history') ? 'active' : '' }}">
+            <a href="{{ route('history') }}" class="nav-link">History</a>
+        </li>
+        <li class="{{ request()->routeIs('expenses') ? 'active' : '' }}">
+            <a href="{{ route('expenses') }}" class="nav-link">Expenses</a>
+        </li>
+        <li class="{{ request()->routeIs('notifications') ? 'active' : '' }}">
+            <a href="{{ route('notifications') }}" class="nav-link">Notifications</a>
+        </li>
+        <li class="{{ request()->routeIs('account.settings') ? 'active' : '' }}">
+            <a href="{{ route('account.settings') }}" class="nav-link">Account Information</a>
+        </li>
         <li>
             <a href="#" class="logout-link no-hover" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
             Logout
@@ -40,66 +52,52 @@
         <img src="{{ asset('images/title.png') }}" alt="Header Image" class="header-image">
     </div>
 
-    <div id="notificationsModal" class="modal-container">
-      <div class="modal-content">
-        {{-- Filter --}}
-        <div class="flex justify-end mb-4">
-          <select
-            class="px-3 py-2 border border-gray-300 rounded bg-[#FBFBFB] focus:outline-none focus:ring-2 focus:ring-[#C6E7FF]"
-          >
-            <option>Filter with</option>
-            <option value="all">All</option>
-            <option value="orders">Orders</option>
-            <option value="users">Users</option>
-          </select>
-        </div>
+    <div class="container mt-4">
 
-        {{-- Notifications Table --}}
-        <div class="overflow-auto">
-          <table class="min-w-full border border-gray-300">
-            <thead class="bg-[#C6E7FF]">
-              <tr>
-                <th class="border border-gray-300 px-4 py-2 text-left text-sm font-medium">Date and Time</th>
-                <th class="border border-gray-300 px-4 py-2 text-left text-sm font-medium">Notification</th>
-              </tr>
-            </thead>
-            <tbody>
-              {{-- Example static rows; replace with @foreach($notifications as $n) ... @endforeach --}}
-              <tr class="bg-white even:bg-[#FBFBFB]">
-                <td class="border border-gray-300 px-4 py-2 text-sm">04/01 10:09</td>
-                <td class="border border-gray-300 px-4 py-2 text-sm">New user registered into your system.</td>
-              </tr>
-              <tr class="bg-white even:bg-[#FBFBFB]">
-                <td class="border border-gray-300 px-4 py-2 text-sm">04/01 10:30</td>
-                <td class="border border-gray-300 px-4 py-2 text-sm">WIN023 laundry completed.</td>
-              </tr>
-              <tr class="bg-white even:bg-[#FBFBFB]">
-                <td class="border border-gray-300 px-4 py-2 text-sm">04/01 13:03</td>
-                <td class="border border-gray-300 px-4 py-2 text-sm">John Doe sent a laundry order.</td>
-              </tr>
-              <tr class="bg-white even:bg-[#FBFBFB]">
-                <td class="border border-gray-300 px-4 py-2 text-sm">04/02 09:34</td>
-                <td class="border border-gray-300 px-4 py-2 text-sm">Jennifer Huh sent a laundry order.</td>
-              </tr>
-              <tr class="bg-white even:bg-[#FBFBFB]">
-                <td class="border border-gray-300 px-4 py-2 text-sm">04/02 10:56</td>
-                <td class="border border-gray-300 px-4 py-2 text-sm">WIN011 laundry completed.</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
+    <!-- Filter Dropdown -->
+    <div class="d-flex justify-content-end mb-3">
+      <select class="form-select w-auto">
+        <option selected>Filter with</option>
+        <option value="all">All</option>
+        <option value="orders">Orders</option>
+      </select>
     </div>
 
-    <script>
-        function openNotificationsModal() {
-            document.getElementById('servicesModal').classList.add('active');
-        }
+    <!-- Notifications Table -->
+    <div class="table-responsive">
+      <table class="table table-bordered table-hover">
+        <thead class="table-info">
+          <tr>
+            <th scope="col">Date and Time</th>
+            <th scope="col">Notification</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>04/01 10:09</td>
+            <td>New user registered into your system.</td>
+          </tr>
+          <tr>
+            <td>04/01 10:30</td>
+            <td>WIN023 laundry completed.</td>
+          </tr>
+          <tr>
+            <td>04/01 13:03</td>
+            <td>John Doe sent a laundry order.</td>
+          </tr>
+          <tr>
+            <td>04/02 09:34</td>
+            <td>Jennifer Huh sent a laundry order.</td>
+          </tr>
+          <tr>
+            <td>04/02 10:56</td>
+            <td>WIN011 laundry completed.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
 
-        function closeNotificationsModal() {
-            document.getElementById('servicesModal').classList.remove('active');
-        }
-    </script>
+</div>
 
 </body>
 </html>

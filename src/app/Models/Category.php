@@ -10,7 +10,7 @@ class Category extends Model
     use HasFactory;
 
     // Specify the table name if it doesn't follow Laravel's pluralization rule
-    protected $table = 'category'; 
+    protected $table = 'categories'; 
 
     protected $fillable = [
         'service_number',

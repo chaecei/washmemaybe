@@ -12,12 +12,25 @@
 <body>
     <div class="sidebar">
         <ul>
-          <li><a href="{{ route('dashboard') }}" class="nav-link {{ request()->routeIs('dashboard') ? 'active' : '' }}">Dashboard</a></li>
-          <li><a href="{{ route('services') }}" class="nav-link services-link {{ request()->routeIs('services') ? 'active' : '' }}">Services</a></li>
-          <li><a href="redirect(history.html)" class="nav-link {{ request()->routeIs('history') ? 'active' : '' }}">History</a></li>
-          <li><a href="redirect(expenses.html)" class="nav-link {{ request()->routeIs('expenses') ? 'active' : '' }}">Expenses</a></li>
-          <li><a href="{{ route('notifications') }}" class="nav-link notifications-link {{ request()->routeIs('notifications') ? 'active' : '' }}">Notification</a></li>
-          <li><a href="{{ route('account.settings') }}" class="nav-link account-link {{ request()->routeIs('account.settings') ? 'active' : '' }}">Account Information</a></li>
+          <li class="{{ request()->routeIs('dashboard') ? 'active' : '' }}">
+            <a href="{{ route('dashboard') }}" class="nav-link">Dashboard</a>
+        </li>
+        <li class="{{ request()->routeIs('services') ? 'active' : '' }}">
+            <a href="{{ route('services') }}" class="nav-link">Services</a>
+        </li>
+        <li class="{{ request()->routeIs('history') ? 'active' : '' }}">
+            <a href="{{ route('history') }}" class="nav-link">History</a>
+        </li>
+        <li class="{{ request()->routeIs('expenses') ? 'active' : '' }}">
+            <a href="{{ route('expenses') }}" class="nav-link">Expenses</a>
+        </li>
+        <li class="{{ request()->routeIs('notifications') ? 'active' : '' }}">
+            <a href="{{ route('notifications') }}" class="nav-link">Notifications</a>
+        </li>
+        <li class="{{ request()->routeIs('account.settings') ? 'active' : '' }}">
+            <a href="{{ route('account.settings') }}" class="nav-link">Account Information</a>
+        </li>
+
           <li>
             <a href="#" class="logout-link no-hover" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
               Logout

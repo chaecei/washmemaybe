@@ -63,8 +63,12 @@ class ServiceController extends Controller
     // 2. Loop through each order (which comes in as a JSON string)
     $orders = json_decode($request->orders[0], true); 
 
+    // Initialize a variable to hold the last created order
+    $newOrder = null;
+
     foreach ($orders as $order) {
-        Order::create([
+        // Create order and assign the last created order to $newOrder
+        $newOrder = Order::create([
             'customer_id'  => $customer->id,
             'service_type' => $order['service_type'] ?? null,
             'total_load'   => $order['total_load'] ?? 0,
@@ -73,7 +77,8 @@ class ServiceController extends Controller
         ]);
     }
 
-    return redirect()->route('dashboard')->with('success', 'Order submitted successfully!');
+    return redirect()->route('services.show', ['id' => $newOrder->id])
+                     ->with('showPaymentModal', true);
 
     }
 
@@ -104,12 +109,36 @@ class ServiceController extends Controller
 
     public function showServiceOrder($orderId)
     {
-        // Retrieve the order by its ID
-        $order = Order::findOrFail($orderId); // Use findOrFail to ensure the order exists
-
+        // Retrieve the order by its ID and eager load the customer data
+        $order = Order::with('customer') // Eager load customer data (first_name, last_name)
+                      ->findOrFail($orderId); // Use findOrFail to ensure the order exists
+    
         // Pass the order to the view
-        return view('service', compact('order'));
+        return view('service')->with('order', $order);
+    }
+    
+
+    public function show($id)
+    {
+        // Retrieve the order by its ID
+        $order = Order::findOrFail($id);
+
+        // Pass the order data to the view
+        return view('services.show')->with('order', $order);
     }
 
+    public function orderHistory()
+    {
+        // Get all orders (you can modify this to fetch only the logged-in user's orders or use any filter)
+        $orders = Order::with('customer')->get();  
+
+        // Pass the orders to the view
+        return view('history')->with('orders', $orders);
+    }
+
+    public function showExpenses()
+    {
+        return view('expenses');
+    }
 
 }
