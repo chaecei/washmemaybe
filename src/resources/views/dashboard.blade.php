@@ -120,7 +120,7 @@
                                   <td>{{ $order->picked_up_at ? $order->picked_up_at->format('M d, Y h:i A') : 'Not yet picked up' }}</td>
                                   <td>
                                       @php
-                                          $pricePerLoad = 50; // you can later move this to config or DB
+                                          $pricePerLoad = 150; // you can later move this to config or DB
                                           $grandTotal = $order->total_load * $pricePerLoad;
                                       @endphp
                                       ₱{{ number_format($grandTotal, 2) }}

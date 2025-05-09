@@ -19,11 +19,11 @@ class ServiceController extends Controller
     // Show recent orders on dashboard
     public function dashboardOrders()
     {
-        $orders = Order::with(['customer', 'category']) // eager-load customer
+        $orders = Order::with(['customer', 'category', 'payment']) // now also loads payment
                     ->orderBy('updated_at', 'desc')
                     ->limit(10)
                     ->get();
-
+    
         return view('dashboard', compact('orders'));
     }
 
@@ -49,39 +49,6 @@ class ServiceController extends Controller
         ]);
     }
 
-    // Store customer and orders in one submission
-    public function store(Request $request)
-    {
-        // 1. Save customer
-        $customer = Customer::create([
-            'first_name' => $request->first_name,
-            'last_name' => $request->last_name,
-            'mobile_number' => $request->mobile_number,
-            'email' => $request->email,
-        ]);
-
-    // 2. Loop through each order (which comes in as a JSON string)
-    $orders = json_decode($request->orders[0], true); 
-
-    // Initialize a variable to hold the last created order
-    $newOrder = null;
-
-    foreach ($orders as $order) {
-        // Create order and assign the last created order to $newOrder
-        $newOrder = Order::create([
-            'customer_id'  => $customer->id,
-            'service_type' => $order['service_type'] ?? null,
-            'total_load'   => $order['total_load'] ?? 0,
-            'detergent'    => $order['detergent'] ?? null,
-            'softener'     => $order['softener'] ?? null,
-        ]);
-    }
-
-    return redirect()->route('services.show', ['id' => $newOrder->id])
-                     ->with('showPaymentModal', true);
-
-    }
-
     public function storePayment(Request $request, Order $order)
     {
         // Validate the payment form data
@@ -90,11 +57,11 @@ class ServiceController extends Controller
             'amount' => 'required|numeric',
             'transaction_id' => 'nullable|string',
         ]);
-
+    
         // Assume the payment is successful and update the order status
-        $order->status = 'Paid';  // or any other status that you define, e.g., 'Processing'
+        $order->status = 'Paid'; // or any other status you want
         $order->save();
-
+    
         // Optionally, you can create a Payment record if you're storing payments separately
         // Payment::create([
         //     'order_id' => $order->id,
@@ -102,8 +69,7 @@ class ServiceController extends Controller
         //     'amount' => $request->amount,
         //     'transaction_id' => $request->transaction_id,
         // ]);
-
-        // Redirect to a confirmation page or back to the dashboard
+    
         return redirect()->route('dashboard')->with('success', 'Payment successfully received!');
     }
 
@@ -116,6 +82,27 @@ class ServiceController extends Controller
         // Pass the order to the view
         return view('service')->with('order', $order);
     }
+
+    public function storeOrder(Request $request)
+    {
+        $validated = $request->validate([
+            'customer_id' => 'required|exists:customers,id',
+            'total_load' => 'required|numeric|min:1',
+            // Add other required fields here
+        ]);
+
+        $order = new Order();
+        $order->customer_id = $validated['customer_id'];
+        $order->total_load = $validated['total_load'];
+        $order->status = 'Pending';
+        $order->save();
+
+        return response()->json([
+            'success' => true,
+            'order_id' => $order->id
+        ]);
+    }
+
     
 
     public function show($id)
@@ -124,7 +111,7 @@ class ServiceController extends Controller
         $order = Order::findOrFail($id);
 
         // Pass the order data to the view
-        return view('services.show')->with('order', $order);
+        return view('services.show', compact('order'));
     }
 
     public function orderHistory()
@@ -139,6 +126,17 @@ class ServiceController extends Controller
     public function showExpenses()
     {
         return view('expenses');
+    }
+
+    public function showPayment($orderId)
+    {
+        // Fetch the order
+        $order = Order::with('category')->findOrFail($orderId);
+
+        // You can also fetch payment info here if already exists
+        $payment = Payment::where('order_id', $orderId)->first();
+
+        return view('payment.show', compact('order', 'payment'));
     }
 
 }

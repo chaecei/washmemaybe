@@ -65,6 +65,6 @@ class AccountController extends Controller
         $user->password = Hash::make($request->new_password);  // Hash the new password before storing it
         $user->save();
 
-        return redirect()->route('dashboard')->with('success', 'Password successfully updated!');
+        return redirect()->route('account.settings')->with('success', 'Password successfully updated!');
     }
 }

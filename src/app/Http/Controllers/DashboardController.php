@@ -10,9 +10,14 @@ class DashboardController extends Controller
 {
     public function index()
     {
-        $orders = Order::with('category')->get(); // Eager load the category relation
-        return view('dashboard', compact('orders')); // Pass the orders to the view
+        $orders = Order::with(['customer', 'category'])
+                    ->orderBy('updated_at', 'desc')
+                    ->limit(10)
+                    ->get();
+
+        return view('dashboard', compact('orders'));
     }
+
 
 
 

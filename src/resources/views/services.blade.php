@@ -6,6 +6,7 @@
     <title>Laundry Shop Dashboard</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="{{ asset('css/dashboard.css') }}">
 </head>
 <body>
@@ -107,7 +108,7 @@
     <div id="servicesModal" class="modal-container">
         <div class="modal-content">
 
-        <form id="fullServiceForm" action="{{ route('service.store') }}" method="POST">
+        <form id="fullServiceForm" action="{{ route('payment.store') }}" method="POST">
             @csrf
             <div class="container-fluid px-0">
                 <div class="row g-0">
@@ -139,7 +140,7 @@
                         <div class="form-container">
                             <h5 class="mb-3">Order Information</h5>
                             <div id="orderContainer"></div>
-                            <input type="hidden" name="orders[]" id="orderData" />
+                            <input type="hidden" name="order_id" id="order_id_payment" />
                             <div class="text-end mt-3">
                                 <button type="button" class="btn btn-outline-secondary me-2" onclick="addOrder()">+ Add Order</button>
                                 <button type="submit" class="btn btn-pastel" id="submitOrderBtn">Submit Service</button>
@@ -200,46 +201,133 @@
             </template>
         </form>
 
-
-        <div class="modal fade" id="orderSummaryModal" tabindex="-1" aria-labelledby="orderSummaryModalLabel" aria-hidden="true">
+        <!-- Payment Modal -->
+        <div class="modal fade" id="paymentModal" tabindex="-1" aria-labelledby="paymentModalLabel" aria-hidden="true">
             <div class="modal-dialog">
                 <div class="modal-content">
-                
-                <div class="modal-header">
-                    <h5 class="modal-title" id="orderSummaryModalLabel">Order Submitted!</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                
-                <div class="modal-body">
-                    <p>Your service order has been successfully submitted.</p>
-                </div>
-                
-                <div class="modal-footer">
-                    <a href="{{ route('payment.show', ['id' => $order->id ?? 0]) }}" class="btn btn-primary">
-                    Proceed to Payment
-                    </a>
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                </div>
-                
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="paymentModalLabel">Payment Information</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                    <<form id="paymentForm" action="{{ route('payment.store', ['order' => $order->id]) }}" method="POST">
+
+                        @csrf
+                        <div class="mb-3">
+                            <label for="payment_method" class="form-label">Payment Method</label>
+                            <select name="payment_method" id="payment_method" class="form-control">
+                                <option value="cash">Cash</option>
+                                <option value="card">Card</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="amount" class="form-label">Amount</label>
+                            <input type="number" name="amount" id="amount" class="form-control" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="transaction_id" class="form-label">Transaction ID</label>
+                            <input type="text" name="transaction_id" id="transaction_id" class="form-control">
+                        </div>
+                        <div class="text-end">
+                            <button type="submit" class="btn btn-pastel">Submit Payment</button>
+                        </div>
+                    </form>
+
+                    </div>
                 </div>
             </div>
         </div>
+
+
+    <script>
+        function openPaymentModal(orderId) {
+            document.getElementById('payment_order_id').value = orderId;
+            document.getElementById('paymentModal').classList.remove('hidden');
+        }
+
+        function closePaymentModal() {
+            document.getElementById('paymentModal').classList.add('hidden');
+        }
+
+        // Handle form submit via AJAX
+        document.getElementById('paymentForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const orderId = document.getElementById('payment_order_id').value;
+            const amount = document.getElementById('payment_amount').value;
+            const paymentMethod = document.getElementById('payment_method').value;
+            const token = document.querySelector('input[name="_token"]').value;
+
+            fetch(`/payments/${orderId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': token
+                },
+                body: JSON.stringify({
+                    amount: amount,
+                    payment_method: paymentMethod
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert(data.message);
+                    closePaymentModal();
+                    location.reload(); // Reload to update dashboard and history
+                }
+            })
+            .catch(error => {
+                console.error('Payment error:', error);
+                alert("Payment failed. Check console.");
+            });
+        });
+    </script>
 
 
 
 <!-- Include Bootstrap JS and jQuery for Modal Functionality -->
 <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.min.js"></script>
+
+
+
 
 <script>
-    document.addEventListener('DOMContentLoaded', function () {
-        const submitBtn = document.getElementById('submitOrderBtn');
-        const modalElement = document.getElementById('orderSummaryModal');
+    document.getElementById('submitOrderBtn').addEventListener('click', function () {
+        const customerId = document.querySelector('[name="customer_id"]').value;
+        const totalLoad = document.querySelector('[name="total_load"]').value;
 
-        submitBtn.addEventListener('click', function (e) {
-            e.preventDefault();
-            const modal = new bootstrap.Modal(modalElement);
-            modal.show();
+        // Send AJAX request to save the order
+        fetch('{{ route('orders.store') }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+            },
+            body: JSON.stringify({
+                customer_id: customerId,
+                total_load: totalLoad
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Store order ID temporarily for payment
+                document.getElementById('order_id_payment').value = data.order_id;
+
+                // Show the payment modal
+                const paymentModal = new bootstrap.Modal(document.getElementById('paymentModal'));
+                paymentModal.show();
+            } else {
+                alert('Something went wrong.');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('An error occurred while submitting the order.');
         });
     });
 </script>
@@ -257,6 +345,16 @@
             {{ session('error') }}
         </div>
     @endif
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            @if(session('showOrderSummary'))
+                let orderModal = new bootstrap.Modal(document.getElementById('orderSummaryModal'));
+                orderModal.show();
+            @endif
+        });
+
+    </script>
 
 
     <script>
@@ -327,98 +425,75 @@
         }
     </script>
 
-<script>
 
-    document.addEventListener('DOMContentLoaded', function() {
-        let orderCount = 0;
-        const orderContainer = document.getElementById('orderContainer');
-        const template = document.getElementById('orderTemplate');
-
-        // Add first order by default
-        addOrder();
-
-        // Add order button
-        document.getElementById('addOrderBtn').addEventListener('click', addOrder);
-
-        // Submit form
-        document.getElementById('submitOrder').addEventListener('click', submitOrder);
-
-        function addOrder() {
-            orderCount++;
-            const clone = template.content.cloneNode(true);
-            clone.querySelector('.order-number').textContent = orderCount;
-            
-            // Remove order button
-            clone.querySelector('.remove-order').addEventListener('click', function() {
-                if (orderCount > 1) {
-                    this.closest('.order-card').remove();
-                    orderCount--;
-                } else {
-                    alert('At least one order is required');
-                }
-            });
-
-            orderContainer.appendChild(clone);
-        }
-
-        async function submitOrder() {
-            const customerForm = document.getElementById('customerForm');
-            const formData = new FormData(customerForm);
-
-            // Validate customer info
-            if (!formData.get('first_name') || !formData.get('mobile_number')) {
-                alert('Please fill in required customer fields');
-                return;
-            }
-
-            try {
-                const response = await fetch("{{ route('service.store') }}", {
-                    method: 'POST',
-                    headers: {
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                        'Accept': 'application/json',
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        customer: Object.fromEntries(formData),
-                        orders: getOrderData()
-                    })
-                });
-
-                const data = await response.json();
-
-                if (data.success) {
-                    alert('Order saved successfully!');
-                    window.location.reload();
-                } else {
-                    alert('Error: ' + (data.message || 'Failed to save order'));
-                }
-            } catch (error) {
-                console.error('Error:', error);
-                alert('Network error - please try again');
-            }
-        }
-
-        function getOrderData() {
-            return Array.from(document.querySelectorAll('.order-card')).map(card => ({
-                service_type: card.querySelector('[name*="service_type"]').value,
-                total_load: parseFloat(card.querySelector('[name*="total_load"]').value),
-                detergent: card.querySelector('[name*="detergent"]').value,
-                softener: card.querySelector('[name*="softener"]').value
-            }));
-        }
-    });
-
-</script>
 
 <script>
     document.addEventListener('DOMContentLoaded', function () {
-        @if(session()->has('customer') || isset($orders))
+        @if(session()->has('customer') || isset($order))
             var myModal = new bootstrap.Modal(document.getElementById('paymentModal'));
             myModal.show();
         @endif
     });
 </script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const serviceForm = document.getElementById('fullServiceForm');
+        const paymentModal = new bootstrap.Modal(document.getElementById('paymentModal'), { keyboard: false });
+
+        serviceForm.addEventListener('submit', function (e) {
+            e.preventDefault(); // Stop default form submission
+
+            // OPTIONAL: Validate required fields here before showing payment modal
+            // Example: Check if orders are filled
+
+            paymentModal.show(); // Show payment modal
+        });
+
+        const paymentForm = document.getElementById('paymentForm');
+        paymentForm.addEventListener('submit', function (e) {
+            // Let the payment form submit normally
+            // Or you can do AJAX submission here
+        });
+    });
+</script>
+
+<script>
+    document.getElementById('paymentForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+
+        const form = e.target;
+        const formData = new FormData(form);
+
+        fetch(form.action, {
+            method: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+            },
+            body: formData
+        })
+        .then(response => {
+            if (response.ok) {
+                return response.json(); // if your controller returns JSON
+            } else {
+                throw new Error('Payment failed.');
+            }
+        })
+        .then(data => {
+            // Success actions here
+            alert("Payment successful!");
+            location.href = '/dashboard'; // Or wherever you want to redirect
+        })
+        .catch(error => {
+            alert("Payment failed: " + error.message);
+        });
+    });
+</script>
+
+
+</body>
 
 
 
