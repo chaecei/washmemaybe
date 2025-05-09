@@ -38,7 +38,7 @@ Route::middleware(['auth'])->group(function () {
 
     // Services and Orders
     Route::get('/services', [ServiceController::class, 'showServices'])->name('services');
-    Route::post('/orders/store', [ServiceController::class, 'storeOrder'])->name('orders.store');
+    Route::post('/order/store', [ServiceController::class, 'storeOrder'])->name('order.store');
     Route::put('/orders/{order}/status', [ServiceController::class, 'updateStatus'])->name('orders.update-status');
     // Route::post('/services/store', [ServiceController::class, 'store'])->name('service.store');
     
@@ -47,7 +47,7 @@ Route::middleware(['auth'])->group(function () {
 
     
     Route::get('/payment/{order}', [ServiceController::class, 'showPayment'])->name('payment.show');
-    Route::post('/payment/store/{order}', [PaymentController::class, 'store'])->name('payment.store');
+    Route::post('/submit-payment', [PaymentController::class, 'store'])->name('payment.submit');
 
 
     // Define the route for order history

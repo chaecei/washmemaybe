@@ -80,7 +80,7 @@ class ServiceController extends Controller
                       ->findOrFail($orderId); // Use findOrFail to ensure the order exists
     
         // Pass the order to the view
-        return view('service')->with('order', $order);
+        return view('orders.store')->with('order', $order);
     }
 
     public function storeOrder(Request $request)
@@ -88,20 +88,24 @@ class ServiceController extends Controller
         $validated = $request->validate([
             'customer_id' => 'required|exists:customers,id',
             'total_load' => 'required|numeric|min:1',
-            // Add other required fields here
+            // Add other required fields here if needed
         ]);
 
+        // Create a new order
         $order = new Order();
         $order->customer_id = $validated['customer_id'];
         $order->total_load = $validated['total_load'];
-        $order->status = 'Pending';
+        $order->status = 'Pending'; // or any default status
         $order->save();
 
+        // Return JSON response for AJAX
         return response()->json([
             'success' => true,
-            'order_id' => $order->id
+            'order_id' => $order->id,
+            'message' => 'Order created successfully!'
         ]);
     }
+
 
     
 
