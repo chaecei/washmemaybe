@@ -5,9 +5,26 @@
   <title>Notifications – Laundry Shop Admin</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
+  <link rel="stylesheet" href="https://cdn.datatables.net/responsive/2.5.0/css/responsive.bootstrap5.min.css">
+
   <link rel="stylesheet" href="{{ asset('css/dashboard.css') }}">
 </head>
 <body class="flex bg-[#D4F6FF] min-h-screen font-sans">
+
+<style>
+    /* Highlight new notifications with gray background */
+  table#notificationsTable tbody tr {
+    transition: background-color 0.3s ease;
+  }
+
+  /* Gray color for new (unread) notifications */
+  table#notificationsTable tbody tr.new-notification {
+    background-color: #f0f0f0;  /* Subtle gray color */
+    font-weight: bold;          /* Make the text bold to emphasize it */
+  }
+</style>
+
 
     <div class="sidebar">
       <ul>
@@ -54,50 +71,67 @@
 
     <div class="container mt-4">
 
-    <!-- Filter Dropdown -->
-    <div class="d-flex justify-content-end mb-3">
-      <select class="form-select w-auto">
-        <option selected>Filter with</option>
-        <option value="all">All</option>
-        <option value="orders">Orders</option>
-      </select>
-    </div>
-
     <!-- Notifications Table -->
-    <div class="table-responsive">
-      <table class="table table-bordered table-hover">
-        <thead class="table-info">
-          <tr>
-            <th scope="col">Date and Time</th>
-            <th scope="col">Notification</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>04/01 10:09</td>
-            <td>New user registered into your system.</td>
-          </tr>
-          <tr>
-            <td>04/01 10:30</td>
-            <td>WIN023 laundry completed.</td>
-          </tr>
-          <tr>
-            <td>04/01 13:03</td>
-            <td>John Doe sent a laundry order.</td>
-          </tr>
-          <tr>
-            <td>04/02 09:34</td>
-            <td>Jennifer Huh sent a laundry order.</td>
-          </tr>
-          <tr>
-            <td>04/02 10:56</td>
-            <td>WIN011 laundry completed.</td>
-          </tr>
-        </tbody>
-      </table>
+    <div class="card border-0 shadow rounded-4">
+      <div class="card-header bg-white border-bottom-0 d-flex align-items-center justify-content-between px-4 py-3">
+        <h5 class="mb-0 fw-semibold text-black" style="font-size: 1.4rem;">Notifications</h5>
+      </div>
+
+      <div class="card-body">
+        <div class="table-responsive">
+          <table class="table table-hover table-bordered table-striped align-middle nowrap" id="notificationsTable" style="width:100%">
+            <thead class="table-info">
+              <tr>
+                <th class="text-center">Date & Time</th>
+                <th class="text-center">Notification</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
     </div>
 
-</div>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+<script src="https://cdn.datatables.net/responsive/2.5.0/js/dataTables.responsive.min.js"></script>
+<script src="https://cdn.datatables.net/responsive/2.5.0/js/responsive.bootstrap5.min.js"></script>
+
+<script>
+  $(document).ready(function () {
+      const table = $('#notificationsTable').DataTable({
+          paging: true,
+          searching: true,
+          info: true,
+          autoWidth: false,
+          order: [[0, 'desc']] // Order by the first column (Date and Time) in descending order
+      });
+
+      function loadNotifications() {
+          $.ajax({
+              url: "{{ route('notifications.fetch') }}",
+              method: "GET",
+              success: function (data) {
+                  table.clear();
+                  data.forEach(n => {
+                      table.row.add([
+                          new Date(n.created_at).toLocaleString(), // Format the date and time
+                          n.message
+                      ]);
+                  });
+                  table.draw();
+              },
+              error: function (xhr, status, error) {
+                  console.error("Error loading notifications:", error);
+              }
+          });
+      }
+
+      loadNotifications();
+      setInterval(loadNotifications, 30000); // Refresh notifications every 30 seconds
+  });
+</script>
 
 </body>
 </html>

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use App\Models\Notification;
 
 class AccountController extends Controller
 {
@@ -43,6 +44,11 @@ class AccountController extends Controller
         
         $user->save();
 
+         Notification::create([
+            'type' => 'profile_change',
+            'message' => 'Admin changed the profile picture.'
+        ]);
+
         return back()->with('success', 'Account Information updated successfully!');    
     }
 
@@ -64,6 +70,12 @@ class AccountController extends Controller
         // Update the user's password
         $user->password = Hash::make($request->new_password);  // Hash the new password before storing it
         $user->save();
+
+        Notification::create([
+            'type' => 'password_change',
+            'message' => 'Admin updated the password.',
+            'is_read' => 0,
+        ]);
 
         return redirect()->route('account.settings')->with('success', 'Password successfully updated!');
     }

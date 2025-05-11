@@ -14,6 +14,14 @@
     <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
 </head>
 <body>
+    <style>
+    .card.shadow-6 {
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+    }
+    #ordersTable th, #ordersTable td {
+        text-align: center;
+    }
+    </style>
 
 <div class="sidebar">
         <ul>
@@ -59,36 +67,59 @@
     </div>
 
  <!-- Order Summary Table Section -->
-<div class="container mt-5">
-    <h2 class="mb-4">Order Summary</h2>
-
-    <table class="table table-bordered table-striped">
-        <thead>
+    <div class="container mt-5">
+    <!-- Adding the shadow to the card -->
+    <div class="card shadow-6 p-4 rounded">
+        <div class="card-body">
+        <table id="ordersTable" class="table table-bordered table-striped">
+            <thead>
             <tr>
-                <th>Service Number</th>
-                <th>Customer Name</th>
-                <th>Date Dropped Off</th>
-                <th>Time</th>
-                <th>Total Load</th>
-                <th>Grand Total</th>
+                <th class="text-center">Service Number</th>
+                <th class="text-center">Customer Name</th>
+                <th class="text-center">Date Dropped Off</th>
+                <th class="text-center">Time</th>
+                <th class="text-center">Total Load</th>
+                <th class="text-center">Service Type</th>
+                <th class="text-center">Grand Total</th>
             </tr>
-        </thead>
-        <tbody>
+            </thead>
+            <tbody>
             @foreach($orders as $order)
                 <tr>
-                    <td>{{ $order->id }}</td>
-                    <td>{{ $order->customer->first_name }} {{ $order->customer->last_name }}</td>
-                    <td>{{ $order->created_at->toFormattedDateString() }}</td>
-                    <td>{{ $order->created_at->format('h:i A') }}</td>
-                    <td>{{ $order->total_load }} </td>
-                    <td>₱{{ number_format($order->total_load * 50, 2) }}</td>
+                <td>{{ $order->id }}</td>
+                <td>{{ $order->customer->first_name }} {{ $order->customer->last_name }}</td>
+                <td>{{ $order->created_at->toFormattedDateString() }}</td>
+                <td>{{ $order->created_at->format('h:i A') }}</td>
+                <td>{{ $order->total_load }}</td>
+                <td>{{ $order->service_type }}</td>
+                <td>₱{{ number_format($order->total_load * 150, 2) }}</td>
                 </tr>
             @endforeach
-        </tbody>
-    </table>
-</div>
+            </tbody>
+        </table>
+        </div>
+    </div>
+    </div>
 
 
+<!-- jQuery (required for DataTables) -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
-    <!-- Bootstrap 5 Scripts (If not already included in your project) -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/js/bootstrap.bundle.min.js"></script>
+<!-- DataTables CSS + JS -->
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+
+<!-- Initialize DataTable -->
+<script>
+    $(document).ready(function () {
+        $('#ordersTable').DataTable({
+            "pageLength": 10,
+            "lengthChange": false,
+            "ordering": true
+        });
+    });
+</script>
+
+
+</body>

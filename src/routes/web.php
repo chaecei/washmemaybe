@@ -26,10 +26,14 @@ Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 Route::middleware(['auth'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
+    Route::get('/category/pending', [CategoryController::class, 'pending']);
+
+
     Route::get('/category/{status}', [CategoryController::class, 'getByStatus']);
     
     // Notifications panel
     Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications');
+    Route::get('/notifications/fetch', [NotificationController::class, 'fetch'])->name('notifications.fetch');
 
     // Account settings
     Route::get('/account/settings', [AccountController::class, 'showSettings'])->name('account.settings');
@@ -47,13 +51,16 @@ Route::middleware(['auth'])->group(function () {
 
     
     Route::get('/payment/{order}', [ServiceController::class, 'showPayment'])->name('payment.show');
-    Route::post('/submit-payment', [PaymentController::class, 'store'])->name('payment.submit');
+    Route::post('payments', [PaymentController::class, 'store'])->name('payments.store');
 
 
     // Define the route for order history
     Route::get('history', [ServiceController::class, 'orderHistory'])->name('history');
 
     Route::get('expenses', [ServiceController::class, 'showExpenses'])->name('expenses');
+    
+    // Notification
+    Route::get('/notifications/fetch', [NotificationController::class, 'fetch'])->name('notifications.fetch');
 
     // Route::resource('services', ServiceController::class);
 

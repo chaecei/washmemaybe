@@ -17,7 +17,6 @@ class Customer extends Model
         'first_name',
         'last_name',
         'mobile_number',
-        'email',
     ];
 
     /**

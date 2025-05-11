@@ -270,6 +270,7 @@
         }
     });
 </script>
+
   <!-- Pending Card Table -->
   <script>
   document.addEventListener('DOMContentLoaded', function () {
@@ -344,40 +345,40 @@
             </div>
           `;
 
-          // const moveButtons = document.querySelectorAll('.move-to-processing');
-          // moveButtons.forEach(button => {
-          //   button.addEventListener('click', function () {
-          //     const orderId = this.getAttribute('data-id');
-          //     const row = this.closest('tr');
-          //     const processingTableBody = document.querySelector('#processingTable tbody');
+          const moveButtons = document.querySelectorAll('.move-to-processing');
+          moveButtons.forEach(button => {
+            button.addEventListener('click', function () {
+              const orderId = this.getAttribute('data-id');
+              const row = this.closest('tr');
+              const processingTableBody = document.querySelector('#processingTable tbody');
 
-          //     fetch(`/category/move-to-processing/${orderId}`, {
-          //       method: 'PATCH',
-          //       headers: {
-          //         'Content-Type': 'application/json',
-          //         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-          //       },
-          //     })
-          //     .then(response => response.json())
-          //     .then(result => {
-          //       if(result.success) {
-          //         processingTableBody.appendChild(row);
+              fetch(`/category/move-to-processing/${orderId}`, {
+                method: 'PATCH',
+                headers: {
+                  'Content-Type': 'application/json',
+                  'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                },
+              })
+              .then(response => response.json())
+              .then(result => {
+                if(result.success) {
+                  processingTableBody.appendChild(row);
 
-          //         row.querySelector('span.badge').textContent = 'Processing';
-          //         row.querySelector('span.badge').className = 'badge bg-info text-dark';
+                  row.querySelector('span.badge').textContent = 'Processing';
+                  row.querySelector('span.badge').className = 'badge bg-info text-dark';
 
-          //         this.disabled = true;
-          //         this.textContent = 'Already in Processing';
-          //       } else {
-          //         console.error('Failed to move order to processing:', result.message);
-          //       }
-          //     })
-          //     .catch(error => console.error('Error moving order to processing:', error));
-          //   });
-          // });
+                  this.disabled = true;
+                  this.textContent = 'Already in Processing';
+                } else {
+                  console.error('Failed to move order to processing:', result.message);
+                }
+              })
+              .catch(error => console.error('Error moving order to processing:', error));
+            });
+          });
         })
         .catch(error => {
-          console.error('Error fetching data:', error);
+          console.error('Error fetc ing data:', error);
         });
 
         function formatDate(date) {
@@ -395,72 +396,72 @@
 
 
 <!-- Processing Card Table -->
-<script>
+  <script>
 
-  document.addEventListener('DOMContentLoaded', function () {
-    const cardProcessing = document.querySelector('.card-processing');
+    document.addEventListener('DOMContentLoaded', function () {
+      const cardProcessing = document.querySelector('.card-processing');
 
-    if (!cardProcessing) {
-      console.error("'.card-processing' element not found.");
-      return;
-    }
+      if (!cardProcessing) {
+        console.error("'.card-processing' element not found.");
+        return;
+      }
 
-    cardProcessing.addEventListener('click', function () {
-      fetch('/category/processing') // Calls the route for processing status
-        .then(response => {
-          if (!response.ok) throw new Error('Network error');
-          return response.json();
-        })
-        .then(data => {
-          const container = document.getElementById('dynamicContent');
-          if (!container) {
-            console.error("'#dynamicContent' container not found.");
-            return;
-          }
+      cardProcessing.addEventListener('click', function () {
+        fetch('/category/processing') // Calls the route for processing status
+          .then(response => {
+            if (!response.ok) throw new Error('Network error');
+            return response.json();
+          })
+          .then(data => {
+            const container = document.getElementById('dynamicContent');
+            if (!container) {
+              console.error("'#dynamicContent' container not found.");
+              return;
+            }
 
-          if (!Array.isArray(data) || data.length === 0) {
-            container.innerHTML = "<p>No processing orders found.</p>";
-            return;
-          }
+            if (!Array.isArray(data) || data.length === 0) {
+              container.innerHTML = "<p>No processing orders found.</p>";
+              return;
+            }
 
-          let rows = '';
-          data.forEach(category => {
-            rows += `
-              <tr>
-                <td>${category.service_number}</td>
-                <td><span class="badge bg-info text-dark">${category.status}</span></td>
-                <td>₱${parseFloat(category.grand_total).toFixed(2)}</td>
-                <td>${category.created_at ?? 'N/A'}</td>
-                <td>${category.updated_at ?? 'N/A'}</td>
-                <td><button class="btn btn-sm btn-success move-to-ready" data-id="${category.id}">Move to Ready for Pickup</button></td>
-              </tr>
+            let rows = '';
+            data.forEach(category => {
+              rows += `
+                <tr>
+                  <td>${category.service_number}</td>
+                  <td><span class="badge bg-info text-dark">${category.status}</span></td>
+                  <td>₱${parseFloat(category.grand_total).toFixed(2)}</td>
+                  <td>${category.created_at ?? 'N/A'}</td>
+                  <td>${category.updated_at ?? 'N/A'}</td>
+                  <td><button class="btn btn-sm btn-success move-to-ready" data-id="${category.id}">Move to Ready for Pickup</button></td>
+                </tr>
+              `;
+            });
+
+            container.innerHTML = `
+              <div class="card flex-grow-1">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                  <h5 class="mb-0">Processing Orders Table</h5>
+                </div>
+                <div class="card-body table-responsive">
+                  <table class="table table-bordered table-striped">
+                    <thead class="table-light">
+                      <tr>
+                        <th>Service Number</th>
+                        <th>Status</th>
+                        <th>Grand Total</th>
+                        <th>Created At</th>
+                        <th>Updated At</th>
+                        <th>Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      ${rows}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
             `;
-          });
-
-          container.innerHTML = `
-            <div class="card flex-grow-1">
-              <div class="card-header d-flex justify-content-between align-items-center">
-                <h5 class="mb-0">Processing Orders Table</h5>
-              </div>
-              <div class="card-body table-responsive">
-                <table class="table table-bordered table-striped">
-                  <thead class="table-light">
-                    <tr>
-                      <th>Service Number</th>
-                      <th>Status</th>
-                      <th>Grand Total</th>
-                      <th>Created At</th>
-                      <th>Updated At</th>
-                      <th>Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    ${rows}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          `;
 
           // Optional: Event listener for the move-to-ready button (you can wire this up later)
         })

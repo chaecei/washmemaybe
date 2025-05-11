@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\Customer;
 use App\Models\Order;
 use App\Models\User;
+use App\Models\Notification;
 use Illuminate\Support\Facades\DB;
 
 class ServiceController extends Controller
@@ -85,29 +86,52 @@ class ServiceController extends Controller
 
     public function storeOrder(Request $request)
     {
+
+        $orders = json_decode($request->input('orders'), true);
+
+        $request->merge(['orders' => $orders]);
+
+        // Validate incoming data
         $validated = $request->validate([
-            'customer_id' => 'required|exists:customers,id',
-            'total_load' => 'required|numeric|min:1',
-            // Add other required fields here if needed
+            'first_name' => 'required|string',
+            'last_name' => 'required|string',
+            'mobile_number' => 'required|string',
+            'orders' => 'required|array',
+            'orders.*.service_type' => 'required|string',
+            'orders.*.total_load' => 'required|integer|min:1',
+            'orders.*.detergent' => 'required|string',
+            'orders.*.softener' => 'required|string',
         ]);
 
-        // Create a new order
-        $order = new Order();
-        $order->customer_id = $validated['customer_id'];
-        $order->total_load = $validated['total_load'];
-        $order->status = 'Pending'; // or any default status
-        $order->save();
+        // You can save customer details here as well if needed
+        $customer = Customer::create([
+            'first_name' => $validated['first_name'],
+            'last_name' => $validated['last_name'],
+            'mobile_number' => $validated['mobile_number'],
+        ]);
 
-        // Return JSON response for AJAX
+        // Loop through each order and save it
+        foreach ($validated['orders'] as $orderData) {
+            Order::create([
+                'customer_id' => $customer->id,
+                'service_type' => $orderData['service_type'],
+                'total_load' => $orderData['total_load'],
+                'detergent' => $orderData['detergent'],
+                'softener' => $orderData['softener'],
+            ]);
+        }
+
+        Notification::create([
+            'type' => 'order_created',
+            'message' => 'A new order was added.'
+        ]);
+
+        // Return success response
         return response()->json([
             'success' => true,
             'order_id' => $order->id,
-            'message' => 'Order created successfully!'
         ]);
     }
-
-
-    
 
     public function show($id)
     {

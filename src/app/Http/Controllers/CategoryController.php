@@ -22,4 +22,12 @@ class CategoryController extends Controller
 
         return response()->json($categories);
     }
+
+    public function pending()
+    {
+        return response()->json(
+            Category::where('status', 'pending')->get()
+        );
+    }
+
 }

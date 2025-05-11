@@ -152,37 +152,77 @@
 
 
         <!-- Account Modal -->
-        <div id="accountModal" class="modal-container">
-            <div class="modal-content">
-    
-                <!-- Account Information -->
-                <div class="section-title">Account Information</div>
-                <form action="{{ route('account.updateInfo') }}" method="POST" enctype="multipart/form-data">
-                    @csrf
-                    <input type="text" class="form-control" name="first_name" placeholder="First Name"
-                        value="{{ auth()->user()->first_name }}">
-                    <input type="text" class="form-control" name="last_name" placeholder="Last Name"
-                        value="{{ auth()->user()->last_name }}">
-                    <input type="email" class="form-control" name="email" placeholder="Email Address"
-                        value="{{ auth()->user()->email }}">
+    <div class="container my-5 p-4 border rounded-5 shadow-lg bg-white">
+        <!-- Account Information Section -->
+        <h4 class="mb-4 text-center">Account Information</h4>
 
-                    <label for="profilePicture" class="form-label">Upload Profile Picture</label>
-                    <input type="file" class="form-control" id="profilePicture" name="profile_picture">
+        <form action="{{ route('account.updateInfo') }}" method="POST" enctype="multipart/form-data">
+            @csrf
 
-                    <button type="submit" class="btn-custom mt-3">Confirm</button>
-                </form>
-                
-                <!-- Password Change Section -->
-                <div class="section-title mt-4">Account Settings</div>
-                <div class="subsection-title">Password Change</div>
-                <form action="{{ route('account.changePassword') }}" method="POST">
-                    @csrf
+            <div class="mb-3">
+                <label for="firstName" class="form-label">First Name</label>
+                <input type="text" class="form-control form-control-lg rounded-3 shadow-none border-0 bg-light"
+                    id="firstName" name="first_name" value="{{ auth()->user()->first_name }}" placeholder="Enter first name" style="background-color: #f0f8ff;">
+            </div>
 
-                    <input type="password" class="form-control" name="old_password" placeholder="Enter Old Password" required>
-                    <input type="password" class="form-control" name="new_password" placeholder="Enter New Password" required>
-                    <input type="password" class="form-control" name="new_password_confirmation" placeholder="Re-enter New Password" required>
-                    <button type="submit" class="btn-custom mt-3">Update Password</button>
-                </form>
+            <div class="mb-3">
+                <label for="lastName" class="form-label">Last Name</label>
+                <input type="text" class="form-control form-control-lg rounded-3 shadow-none border-0 bg-light"
+                    id="lastName" name="last_name" value="{{ auth()->user()->last_name }}" placeholder="Enter last name" style="background-color: #f0f8ff;">
+            </div>
+
+            <div class="mb-3">
+                <label for="email" class="form-label">Email Address</label>
+                <input type="email" class="form-control form-control-lg rounded-3 shadow-none border-0 bg-light"
+                    id="email" name="email" value="{{ auth()->user()->email }}" placeholder="Enter email" style="background-color: #f0f8ff;">
+            </div>
+
+            <div class="mb-3">
+                <label for="profilePicture" class="form-label">Upload Profile Picture</label>
+                <input type="file" class="form-control form-control-lg rounded-3 shadow-none border-0 bg-light"
+                    id="profilePicture" name="profile_picture" accept="image/*" style="background-color: #f0f8ff;">
+            </div>
+
+            <div class="d-flex justify-content-start    mt-4">
+                <button type="submit" class="btn btn-primary btn-lg rounded-3 shadow-sm" style="background-color: #578fca; border-color: #add8e6;">
+                    Update Information
+                </button>
+            </div>
+        </form>
+
+        <hr class="my-4">
+
+        <!-- Account Settings Section -->
+        <h4 class="mb-4 text-center">Account Settings</h4>
+
+        <form action="{{ route('account.changePassword') }}" method="POST">
+            @csrf
+
+            <div class="mb-3">
+                <label for="oldPassword" class="form-label">Old Password</label>
+                <input type="password" class="form-control form-control-lg rounded-3 shadow-none border-0 bg-light"
+                    id="oldPassword" name="old_password" placeholder="Enter Old Password" required style="background-color: #f0f8ff;">
+            </div>
+
+            <div class="mb-3">
+                <label for="newPassword" class="form-label">New Password</label>
+                <input type="password" class="form-control form-control-lg rounded-3 shadow-none border-0 bg-light"
+                    id="newPassword" name="new_password" placeholder="Enter New Password" required style="background-color: #f0f8ff;">
+            </div>
+
+            <div class="mb-3">
+                <label for="newPasswordConfirmation" class="form-label">Re-enter New Password</label>
+                <input type="password" class="form-control form-control-lg rounded-3 shadow-none border-0 bg-light"
+                    id="newPasswordConfirmation" name="new_password_confirmation" placeholder="Re-enter New Password" required style="background-color: #f0f8ff;">
+            </div>
+
+            <div class="d-flex justify-content-start mt-4">
+                <button type="submit" class="btn btn-primary btn-lg rounded-3 shadow-sm" style="background-color: #578fca; border-color: #add8e6;">
+                    Update Password
+                </button>
+            </div>
+        </form>
+    </div>
 
                     <!-- Display success message -->
                     @if(session('success'))
@@ -224,13 +264,12 @@
                         </script>
                     @endif
 
-                <div class="form-group mt-5">
-                    <!-- <label class="form-label">Last Update:</label> -->
-                    <div class="alert alert-info" role="alert">
-                        Last updated on {{ auth()->user()->updated_at->format('F d, Y \a\t h:i A') }}
-                    </div>
-                </div>
 
+            <div class="mt-5">
+                <div class="alert alert-info text-center" role="alert" style="background-color: #d1e7dd; border-color: #badbcc;">
+                    <strong>Last updated on:</strong> {{ auth()->user()->updated_at->format('F d, Y \a\t h:i A') }}
+                </div>
+            </div>
 
             </div>
         </div>

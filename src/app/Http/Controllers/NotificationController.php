@@ -9,13 +9,16 @@ class NotificationController extends Controller
 {
     public function index()
     {
-        $notifications = collect([
-            (object)['created_at' => now(), 'message' => 'Test notification 1'],
-            (object)['created_at' => now(), 'message' => 'Test notification 2'],
-        ]);
-    
-        return view('notification-panel', ['notifications' => $notifications]);
-
+        return view('notification-panel'); // Make sure this view exists in your resources/views
     }
-    
+
+    public function fetch()
+    {
+        // Fetch all notifications ordered by latest (most recent first)
+        $notifications = \App\Models\Notification::latest()->get();
+
+        // Return notifications in JSON format
+        return response()->json($notifications);
+    }
 }
+

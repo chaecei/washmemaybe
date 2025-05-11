@@ -17,22 +17,17 @@ class PaymentController extends Controller
     }
 
     public function store(Request $request)
-    {
-        $request->validate([
-            'order_id' => 'required|exists:orders,id',
-            'payment_method' => 'required|string',
-            'amount' => 'required|numeric|min:0',
-            'transaction_id' => 'nullable|string',
-        ]);
+{
+    $validated = $request->validate([
+        'order_id' => 'required|exists:orders,id',
+        'payment_method' => 'required|string',
+        'amount' => 'required|numeric|min:1',
+    ]);
 
-        Payment::create([
-            'order_id' => $request->order_id,
-            'payment_method' => $request->payment_method,
-            'amount' => $request->amount,
-            'transaction_id' => $request->transaction_id,
-        ]);
+    // Save the payment
+    Payment::create($validated);
 
-        return redirect()->back()->with('success', 'Payment submitted successfully!');
-    }
+    return response()->json(['success' => true]);
+}
 
 }
