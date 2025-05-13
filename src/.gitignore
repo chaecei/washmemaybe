@@ -1,3 +1,6 @@
-*
-!data/
-!.gitignore
+# Instead of ignoring everything:
+# *
+
+# Just ignore what you need:
+*.log
+*.tmp
