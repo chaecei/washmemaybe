@@ -1,0 +1,146 @@
+for dashboard pending logic
+
+        <!-- Pending Modal -->
+    <!-- <div class="modal fade" id="pendingModal" tabindex="-1" aria-labelledby="pendingModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Pending Orders</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+
+                    <table class="table table-bordered">
+                        <thead>
+                            <tr>
+                                <th>Service Number</th>
+                                <th>Status</th>
+                                <th>Date and Time Picked Up</th>
+                                <th>Grand Total</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach ($categories as $category)
+                                <tr>
+                                    <td>{{ $category->service_number }}</td>
+                                    <td>{{ $category->status }}</td>
+                                    <td>{{ number_format($category->grand_total, 2) }}</td>
+                                    <td>{{ $category->created_at->format('m-d-y') }}</td>
+                                    <td>{{ $category->updated_at->format('m-d-y') }}</td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+
+                </div>
+            </div>
+        </div>
+    </div> -->
+
+
+
+
+
+
+    script from services blade
+
+    <script>
+        function addOrder() {
+            const orderTemplate = `
+            <div class="order-block">
+                <input type="hidden" name="orders[][customer_id]" value="">
+                <input type="radio" name="orders[][service_type]" value="Wash and Fold" required>
+                <!-- other fields -->
+            </div>`;
+            document.getElementById('orderContainer').insertAdjacentHTML('beforeend', orderTemplate);
+        }
+
+        // Handle form submission
+        document.querySelector('form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            // Add AJAX submission or let form submit normally
+        });
+    </script>
+
+    <script>
+        let orderCount = 0;
+
+        function addOrder() {
+            orderCount++;
+            const container = document.getElementById('orderContainer');
+            const template = document.getElementById('orderTemplate');
+            const clone = template.content.cloneNode(true);
+
+            const orderBlock = clone.querySelector('.order-block');
+            const serviceRadios = clone.querySelectorAll('.service-type');
+            const totalLoadGroup = clone.querySelector('.total-load-group');
+            const detergentGroup = clone.querySelector('.detergent-group');
+            const softenerGroup = clone.querySelector('.softener-group');
+            const orderNumberSpan = clone.querySelector('.order-number');
+
+            orderNumberSpan.textContent = orderCount;
+
+            // Unique radio group per order
+            serviceRadios.forEach((radio) => {
+            radio.name = `serviceType${orderCount}`;
+            radio.addEventListener('change', () => {
+                totalLoadGroup.classList.remove('hidden');
+            });
+            });
+
+            clone.querySelector('.total-load').addEventListener('input', function () {
+            if (this.value > 0) {
+                detergentGroup.classList.remove('hidden');
+            } else {
+                detergentGroup.classList.add('hidden');
+                softenerGroup.classList.add('hidden');
+            }
+            });
+
+            clone.querySelector('.detergent').addEventListener('change', () => {
+            softenerGroup.classList.remove('hidden');
+            });
+
+            container.appendChild(clone);
+        }
+
+        // Load first order by default
+        window.onload = addOrder;
+    </script>
+
+
+{/* <div class="modal fade" id="paymentModal" tabindex="-1" aria-labelledby="paymentModalLabel" aria-hidden="true">
+<div class="modal-content">
+
+<div class="modal-header">
+    
+  <h5 class="modal-title" id="paymentModalLabel"> Payment for Order #{{ $order->id }} </h5> 
+    
+    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="close"></button>
+</div>
+
+<div class="modal-body">
+    <form action="{{ route('payment.show', $order->id) }}" method="POST">
+        @csrf
+        <div class="mb-3">
+            <label for="payment_method" class="form-label">Payment Method:</label>
+            <input type="text" name="payment_method" class="form-control" required>
+        </div> 
+
+        <div class="mb-3">
+            <label for="amount" class="form-label"> Amount: </label>
+            <input type="number" name="amount" class="form-control" value="{{ $order->total_load * 150 }}" required>
+        </div>
+
+        <div class="mb-3">
+            <label for="transaction_id" class="form-label"> Transaction ID: </label>
+            <input type="number" name="amount" class="form-control" value="{{ $order->total_load * 150 }}" required>
+        </div>
+
+        <div class="modal-footer">
+            <button type="submit" class="btn btn-success"> Submit Payment </button>
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"> Cancel </button>
+        <div>
+    </form>
+</div> */}
