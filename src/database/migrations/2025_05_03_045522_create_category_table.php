@@ -13,12 +13,14 @@ return new class extends Migration
     {
         Schema::create('category', function (Blueprint $table) {
             $table->id();
-            $table->string('service_number'); // Service number field
+            $table->unsignedBigInteger('order_id'); // Renamed to 'order_id' for clarity
+            $table->foreign('service_number')->references('id')->on('orders')->onDelete('cascade'); // Foreign key reference to 'orders'
             $table->string('status'); // Status field
-            $table->decimal('grand_total', 10, 2); // Grand total field with two decimal places
+            $table->integer('days_unclaimed')->default(0); // Days unclaimed column (default 0)
             $table->string('name');
             $table->timestamps();
         });
+
     }
 
     /**

@@ -46,6 +46,35 @@ a {
     border-bottom-right-radius: 15px;
     white-space: nowrap ;
 }
+.status-badge {
+    font-size: 14px;  /* Adjust font size */
+    font-weight: bold; /* Make the font bold */
+    padding: 5px 10px; /* Add some padding for better spacing */
+    border-radius: 12px; /* Rounded corners */
+    display: inline-block; /* Ensure it's inline and can flow within the table */
+}
+
+/* You can also define styles based on the badge color */
+.badge-pending {
+    background-color: #ff9800; /* Pending color */
+    color: white; /* Text color */
+    font-size: 16px;
+}
+
+.badge-completed {
+    background-color: #4caf50; /* Completed color */
+    color: white;
+}
+
+.badge-cancelled {
+    background-color: #f44336; /* Cancelled color */
+    color: white;
+}
+
+.badge-no-status {
+    background-color: #9e9e9e; /* Gray for no status */
+    color: white;
+}
 .header-image {
     width: 25%;      /* Makes the image fit the full sidebar width */
     height: auto;     /* Keep aspect ratio */
@@ -74,6 +103,67 @@ a {
 .submenu.show {
     display: block;
     padding-left: 30px;
+}
+/* Card table styling */
+.card-table-container {
+    max-height: 400px;
+    overflow-y: auto;
+    border-top: 1px solid rgba(0,0,0,.125);
+    padding: 0;
+}
+
+.card-table-container .table {
+    margin-bottom: 0;
+}
+
+.card-table-container .table thead th {
+    position: sticky;
+    top: 0;
+    background: white;
+    z-index: 10;
+}
+
+/* Compact table styling */
+.card-table-container .table-sm td, 
+.card-table-container .table-sm th {
+    padding: 0.3rem;
+    font-size: 0.875rem;
+}
+
+/* Card hover effects */
+.card:hover {
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+    transition: all 0.3s ease;
+}
+
+/* Small action buttons */
+.btn-sm {
+    padding: 0.2rem 0.4rem;
+    font-size: 0.75rem;
+    line-height: 1.2;
+}
+/* Status badges */
+.badge-bg-warning { background-color: #ffc107; color: #000; }
+.badge-bg-info { background-color: #0dcaf0; color: #000; }
+.badge-bg-success { background-color: #198754; color: #fff; }
+.badge-bg-danger { background-color: #dc3545; color: #fff; }
+
+/* Clickable cards */
+.card-pending, .card-processing, 
+.card-ready, .card-unclaimed {
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.card-pending:hover { transform: scale(1.02); }
+.card-processing:hover { transform: scale(1.02); }
+.card-ready:hover { transform: scale(1.02); }
+.card-unclaimed:hover { transform: scale(1.02); }
+
+/* Action buttons */
+.btn-sm {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.875rem;
 }
 .admin-profile {
     position: absolute;
@@ -151,9 +241,20 @@ a {
 .badge-completed { background-color: #e0e0e0; color: #424242; }
 .badge-unclaimed { background-color: #ffcdd2; color: #c62828; }
 
+.chart-row {
+    display: flex;
+    justify-content: space-between;
+}
+
+.chart-container {
+    width: 48%;
+    height: 450px;
+    margin: 0 2%;
+}
+
 .circle-card {
-    width: 200px;
-    height: 200px;
+    width: 250px;
+    height: 250px;
     border-radius: 50%;
     background-color: #60B5FF;
     color: white;
@@ -165,7 +266,7 @@ a {
     transition: transform 0.3s ease, box-shadow 0.3s ease;
     margin-left: auto;
     padding-top: 5px;
-    margin-top: 180px;
+    margin-top: 220px;
     margin-left: 100px;
     margin-right: 100px;
 }

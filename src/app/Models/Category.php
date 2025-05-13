@@ -7,21 +7,24 @@ use Illuminate\Database\Eloquent\Model;
 
 class Category extends Model
 {
-    use HasFactory;
-
     // Specify the table name if it doesn't follow Laravel's pluralization rule
-    protected $table = 'categories'; 
+    protected $table = 'category'; 
 
     protected $fillable = [
+        'order_id',
         'service_number',
         'status',
-        'grand_total',
         'days_unclaimed',
-        'name',
+        'picked_up_at',
     ];
 
     public function orders()
     {
         return $this->hasMany(Order::class);
     }
+    public function order()
+    {
+        return $this->belongsTo(Order::class, 'order_id'); // Each category belongs to an order
+    }
+
 }

@@ -35,7 +35,7 @@
             <a href="{{ route('history') }}" class="nav-link">History</a>
         </li>
         <li class="{{ request()->routeIs('expenses') ? 'active' : '' }}">
-            <a href="{{ route('expenses') }}" class="nav-link">Expenses</a>
+            <a href="{{ route('expenses.index') }}" class="nav-link">Expenses</a>
         </li>
         <li class="{{ request()->routeIs('notifications') ? 'active' : '' }}">
             <a href="{{ route('notifications') }}" class="nav-link">Notifications</a>
@@ -66,39 +66,50 @@
       <img src="{{ asset('images/title.png') }}" alt="Header Image" class="header-image">
     </div>
 
- <!-- Order Summary Table Section -->
+    <!-- Order Summary Table Section -->
     <div class="container mt-5">
-    <!-- Adding the shadow to the card -->
-    <div class="card shadow-6 p-4 rounded">
-        <div class="card-body">
-        <table id="ordersTable" class="table table-bordered table-striped">
-            <thead>
-            <tr>
-                <th class="text-center">Service Number</th>
-                <th class="text-center">Customer Name</th>
-                <th class="text-center">Date Dropped Off</th>
-                <th class="text-center">Time</th>
-                <th class="text-center">Total Load</th>
-                <th class="text-center">Service Type</th>
-                <th class="text-center">Grand Total</th>
-            </tr>
-            </thead>
-            <tbody>
-            @foreach($orders as $order)
-                <tr>
-                <td>{{ $order->id }}</td>
-                <td>{{ $order->customer->first_name }} {{ $order->customer->last_name }}</td>
-                <td>{{ $order->created_at->toFormattedDateString() }}</td>
-                <td>{{ $order->created_at->format('h:i A') }}</td>
-                <td>{{ $order->total_load }}</td>
-                <td>{{ $order->service_type }}</td>
-                <td>₱{{ number_format($order->total_load * 150, 2) }}</td>
-                </tr>
-            @endforeach
-            </tbody>
-        </table>
+        <!-- Adding the shadow to the card -->
+        <div class="card shadow-6 p-4 rounded">
+            <div class="card-body">
+                <table id="ordersTable" class="table table-bordered table-striped">
+                    <thead>
+                        <tr>
+                            <th class="text-center">Service Number</th>
+                            <th class="text-center">Customer Name</th>
+                            <th class="text-center">Date Dropped Off</th>
+                            <th class="text-center">Time</th>
+                            <th class="text-center">Total Load</th>
+                            <th class="text-center">Service Type</th>
+                            <th class="text-center">Grand Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach($orders as $order)
+                            <tr>
+                                <td class="text-center">{{ $order->id }}</td>
+                                <td class="text-center">{{ $order->customer->first_name }} {{ $order->customer->last_name }}</td>
+                                <td class="text-center">{{ $order->created_at->format('m/d/Y') }}</td>
+                                <td class="text-center">{{ $order->created_at->format('H:i') }}</td>
+                                
+                                <td class="text-center">
+                                    @foreach($order->items as $item)
+                                        {{ $item->total_load }}<br> <!-- Display total load -->
+                                    @endforeach
+                                </td>
+
+                                <td class="text-center">
+                                    @foreach($order->items as $item)
+                                        {{ $item->service_type }}<br> <!-- Display service type -->
+                                    @endforeach
+                                </td>
+
+                                <td class="text-center">₱{{ number_format($order->grand_total, 2) }}</td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
         </div>
-    </div>
     </div>
 
 

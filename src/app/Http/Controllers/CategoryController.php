@@ -9,25 +9,32 @@ class CategoryController extends Controller
 {
     public function getByStatus($status)
     {
-
+        // Normalize the input status to match the expected format
         $normalizedStatus = ucwords(strtolower($status));
 
-        $validStatuses = ['pending', 'processing', 'ready for pickup', 'unclaimed'];
+        // Define the valid statuses with consistent casing
+        $validStatuses = ['Pending', 'Processing', 'Ready For Pickup', 'Unclaimed'];
 
-        if(!in_array(strtolower($normalizedStatus), $validStatuses)) {
+        // Check if the provided status is valid
+        if (!in_array($normalizedStatus, $validStatuses)) {
             return response()->json(['error' => 'Invalid status'], 400);
         }
 
+        // Fetch categories with the specified status
         $categories = Category::where('status', $normalizedStatus)->get();
 
-        return response()->json($categories);
+        // Return the categories as a JSON response
+        return response()->json([
+            'success' => true,
+            'categories' => $categories
+        ]);
     }
-
     public function pending()
     {
-        return response()->json(
-            Category::where('status', 'pending')->get()
-        );
+        // Retrieve categories with 'pending' status
+        $categories = Category::where('status', 'Pending')->get();
+
+        return response()->json($categories);
     }
 
 }

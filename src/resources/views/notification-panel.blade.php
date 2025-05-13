@@ -38,7 +38,7 @@
             <a href="{{ route('history') }}" class="nav-link">History</a>
         </li>
         <li class="{{ request()->routeIs('expenses') ? 'active' : '' }}">
-            <a href="{{ route('expenses') }}" class="nav-link">Expenses</a>
+            <a href="{{ route('expenses.index') }}" class="nav-link">Expenses</a>
         </li>
         <li class="{{ request()->routeIs('notifications') ? 'active' : '' }}">
             <a href="{{ route('notifications') }}" class="nav-link">Notifications</a>
