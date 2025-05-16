@@ -13,6 +13,7 @@ return new class extends Migration
             $table->foreignId('customer_id')->constrained()->onDelete('cascade'); // Foreign key reference to customers
             $table->foreignId('category_id')->constrained('categories');
             $table->foreignId('category_id')->nullable()->constrained('categories')->onDelete('set null'); // Link to categories table
+            $table->decimal('grand_total', 10, 2); // or 'total_amount'
             $table->timestamps();
         });
     }

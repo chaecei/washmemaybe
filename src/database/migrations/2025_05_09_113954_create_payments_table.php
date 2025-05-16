@@ -18,6 +18,8 @@ return new class extends Migration
             $table->decimal('amount', 10, 2);
             $table->string('transaction_id')->nullable();
             $table->timestamps();
+
+            $table->foreign('order_id')->references('id')->on('orders')->onDelete('cascade');
         });
     }
 

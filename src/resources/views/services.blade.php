@@ -220,7 +220,6 @@
                         <div class="mb-3">
                             <label for="payment_method" class="form-label">Payment Method</label>
                             <select class="form-select" name="payment_method" required>
-                                <option value="gcash">GCash</option>
                                 <option value="cash">Cash</option>
                             </select>
                         </div>
@@ -243,14 +242,14 @@
                             </div>
 
                             <div id="paymentOrderSummary" class="mb-3"></div>
-                                <strong>Grand Total:</strong> <span id="paymentGrandTotal">₱0.00</span><br>
+                                <strong>Grand Total:</strong> <span id="paymentGrandTotal">₱10.00</span><br>
                         </div>
 
                         <div id="paymentErrors" class="text-danger mb-2"></div>
                     </div>
 
                     <div class="modal-footer">
-                        <button type="submit" class="btn btn-success">Submit Payment</button>
+                        <button type="button" id="submitPaymentButton" class="btn btn-primary">Submit Payment</button>
                     </div>
                 </form>
             </div>
@@ -361,160 +360,156 @@
                     softener: orderBlock.find(".softener").val()
                 };
 
-            // Validate required fields
-            if (!orderData.service_type || !orderData.total_load || !orderData.detergent || !orderData.softener) {
-                hasErrors = true;
-                return false; // Exit the loop
-            }
-
-            orders.push(orderData);
-        });
-
-        if (hasErrors) {
-            alert("Please complete all order fields");
-            return;
-        }
-
-        // Display basic info in modal immediately
-        updatePaymentModal(customerInfo, orders);
-
-        // Show the modal
-        const paymentModal = new bootstrap.Modal(document.getElementById('paymentModal'));
-        paymentModal.show();
-
-        // Calculate prices via AJAX
-        calculatePrices(customerInfo, orders);
-    });
-
-    function updatePaymentModal(customerInfo, orders) {
-        // Update customer info
-        $("#paymentName").text(`${customerInfo.first_name} ${customerInfo.last_name}`);
-        $("#paymentMobile").text(customerInfo.mobile_number);
-
-        // Update order items
-        let orderItemsHTML = '';
-        orders.forEach((order, index) => {
-            orderItemsHTML += `
-                <div class="order-item mb-3">
-                    <h6>Order ${index + 1}</h6>
-                    <p><strong>Service:</strong> ${order.service_type || 'Not specified'}</p>
-                    <p><strong>Load:</strong> ${order.total_load || '0'} </p>
-                    <p><strong>Detergent:</strong> ${order.detergent || 'Not specified'}</p>
-                    <p><strong>Softener:</strong> ${order.softener || 'Not specified'}</p>
-                </div>
-            `;
-        });
-
-        $("#paymentOrderItems").html(orderItemsHTML);
-        $("#paymentGrandTotal").text("Calculating...");
-    }
-
-    function calculatePrices(customerInfo, orders) {
-        $.ajax({
-            url: '/order/calculate-prices',
-            type: 'POST',
-            data: {
-                _token: $('meta[name="csrf-token"]').attr('content'),
-                orders: orders
-            },
-            success: function(response) {
-                if (response.success) {
-                    // Update the modal display
-                    updatePriceDisplay(response);
-                } else {
-                    showCalculationError(response.message);
+                // Validate required fields
+                if (!orderData.service_type || !orderData.total_load || !orderData.detergent || !orderData.softener) {
+                    hasErrors = true;
+                    return false; // Exit the loop
                 }
-            },
-            error: function(xhr) {
-                showCalculationError(xhr.responseJSON?.message || "Server error");
+
+                orders.push(orderData);
+            });
+
+            if (hasErrors) {
+                alert("Please complete all order fields");
+                return;
             }
+
+            // Display basic info in modal immediately
+            updatePaymentModal(customerInfo, orders);
+
+            // Show the modal
+            const paymentModal = new bootstrap.Modal(document.getElementById('paymentModal'));
+            paymentModal.show();
+
+            // Calculate prices via AJAX
+            calculatePrices(customerInfo, orders);
         });
-    }
 
-    function updatePriceDisplay(response) {
-        // Update grand total
-        $("#paymentGrandTotal").text(`₱${response.grand_total.toFixed(2)}`);
-        $("input[name='amount']").val(response.grand_total.toFixed(2));
+        function updatePaymentModal(customerInfo, orders) {
+            // Update customer info
+            $("#paymentName").text(`${customerInfo.first_name} ${customerInfo.last_name}`);
+            $("#paymentMobile").text(customerInfo.mobile_number);
 
-        // Update each order item with prices
-        response.order_items.forEach((item, index) => {
-            const orderElement = $(`#paymentOrderItems .order-item:nth-child(${index + 1})`);
-            
-            orderElement.find('.price-details').remove(); // Clear previous prices
-            
-            orderElement.append(`
-                <div class="price-details mt-2">
-                    <p><strong>Load Price:</strong> ₱${item.total_load_price.toFixed(2)}</p>
-                    <p><strong>Detergent:</strong> ₱${item.detergent_price.toFixed(2)}</p>
-                    <p><strong>Softener:</strong> ₱${item.softener_price.toFixed(2)}</p>
-                    <p><strong>Subtotal:</strong> ₱${(
-                        item.total_load_price + 
-                        item.detergent_price + 
-                        item.softener_price
-                    ).toFixed(2)}</p>
-                </div>
-            `);
-        });
-    }
+            // Update order items
+            let orderItemsHTML = '';
+            orders.forEach((order, index) => {
+                orderItemsHTML += `
+                    <div class="order-item mb-3">
+                        <h6>Order ${index + 1}</h6>
+                        <p><strong>Service:</strong> ${order.service_type || 'Not specified'}</p>
+                        <p><strong>Load:</strong> ${order.total_load || '0'}</p>
+                        <p><strong>Detergent:</strong> ${order.detergent || 'Not specified'}</p>
+                        <p><strong>Softener:</strong> ${order.softener || 'Not specified'}</p>
+                    </div>
+                `;
+            });
 
-    function showCalculationError(message) {
-        $("#paymentGrandTotal").text(message);
-        console.error("Price calculation error:", message);
-    }
-});
-
-    $("#confirmPaymentBtn").click(function () {
-        const amountPaid = $("input[name='amount_paid']").val(); // from modal input
-        const amountDue = parseFloat($("input[name='amount']").val());
-
-        if (!amountPaid || parseFloat(amountPaid) < amountDue) {
-            alert("Please enter a valid payment amount.");
-            return;
+            $("#paymentOrderItems").html(orderItemsHTML);
+            $("#paymentGrandTotal").text("Calculating...");
         }
 
-        // Collect all necessary data again
-        const customerInfo = {
-            first_name: $("input[name='first_name']").val(),
-            last_name: $("input[name='last_name']").val(),
-            mobile_number: $("input[name='mobile_number']").val()
-        };
+        function calculatePrices(customerInfo, orders) {
+            $.ajax({
+                url: '/order/calculate-prices',
+                type: 'POST',
+                data: {
+                    _token: $('meta[name="csrf-token"]').attr('content'),
+                    orders: orders
+                },
+                success: function(response) {
+                    if (response.success) {
+                        // Update the modal display
+                        updatePriceDisplay(response);
+                    } else {
+                        showCalculationError(response.message);
+                    }
+                },
+                error: function(xhr) {
+                    showCalculationError(xhr.responseJSON?.message || "Server error");
+                }
+            });
+        }
 
-        const orders = [];
-        $(".order-block").each(function () {
-            const orderBlock = $(this);
-            orders.push({
-                service_type: orderBlock.find(".service-type:checked").val(),
-                total_load: orderBlock.find(".total_load").val(),
-                detergent: orderBlock.find(".detergent").val(),
-                softener: orderBlock.find(".softener").val()
+        function updatePriceDisplay(response) {
+            // Update grand total
+            $("#paymentGrandTotal").text(`₱${response.grand_total.toFixed(2)}`);
+            $("input[name='amount']").val(response.grand_total.toFixed(2));
+
+            // Update each order item with prices
+            response.order_items.forEach((item, index) => {
+                const orderElement = $(`#paymentOrderItems .order-item:nth-child(${index + 1})`);
+                
+                orderElement.find('.price-details').remove(); // Clear previous prices
+                
+                orderElement.append(`
+                    <div class="price-details mt-2">
+                        <p><strong>Load Price:</strong> ₱${item.total_load_price.toFixed(2)}</p>
+                        <p><strong>Detergent:</strong> ₱${item.detergent_price.toFixed(2)}</p>
+                        <p><strong>Softener:</strong> ₱${item.softener_price.toFixed(2)}</p>
+                    </div>
+                `);
+            });
+
+            // Enable the Submit Payment button
+            $("#submitPaymentButton").prop('disabled', false);
+        }
+
+        // Use the existing "Submit Payment" button to save the order to the database
+        $("#submitPaymentButton").click(function (e) {
+            e.preventDefault();
+
+            const customerInfo = {
+                first_name: $("input[name='first_name']").val(),
+                last_name: $("input[name='last_name']").val(),
+                mobile_number: $("input[name='mobile_number']").val()
+            };
+
+            const orders = [];
+            $(".order-block").each(function () {
+                const orderBlock = $(this);
+                const orderData = {
+                    service_type: orderBlock.find(".service-type:checked").val(),
+                    total_load: parseInt(orderBlock.find(".total_load").val()) || 0,
+                    detergent: orderBlock.find(".detergent").val(),
+                    softener: orderBlock.find(".softener").val(),
+                    total_load_price: parseFloat(orderBlock.find(".total_load_price").val()) || 0,
+                    detergent_price: parseFloat(orderBlock.find(".detergent_price").val()) || 0,
+                    softener_price: parseFloat(orderBlock.find(".softener_price").val()) || 0
+                };
+
+                orders.push(orderData);
+            });
+
+            $.ajax({
+                url: '{{ route("order.save") }}',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({
+                    _token: $('meta[name="csrf-token"]').attr('content'),
+                    customer_info: customerInfo,
+                    orders: orders,
+                    grand_total: $("input[name='amount']").val()
+                }),
+                success: function (response) {
+                    if (response.success) {
+                        alert("Order saved successfully!");
+                    } else {
+                        alert("Failed to save the order.");
+                    }
+                },
+                error: function (xhr) {
+                    console.error(xhr.responseText);
+                    alert("Error saving the order.");
+                }
             });
         });
 
-        // ✅ Final AJAX call to save everything to database
-        $.ajax({
-            url: "/order/save", // 🔁 replace with your actual route
-            method: "POST",
-            data: {
-                _token: $('meta[name="csrf-token"]').attr('content'),
-                customer: customerInfo,
-                orders: orders,
-                amount_paid: amountPaid,
-                amount_due: amountDue
-            },
-            success: function (res) {
-                if (res.success) {
-                    alert("Payment recorded successfully!");
-                    location.reload(); // Or redirect if needed
-                } else {
-                    alert("Failed to save payment: " + res.message);
-                }
-            },
-            error: function (xhr) {
-                console.error("Save error:", xhr);
-                alert("Server error while saving");
-            }
-        });
+        function showCalculationError(message) {
+            $("#paymentErrors").text(message);
+        }
     });
+
+
 </script>
 
 

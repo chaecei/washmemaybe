@@ -22,12 +22,11 @@
                 <input type="password" name="password" placeholder="********"
                     class="w-full mb-4 px-4 py-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-[#C6E7FF]" required>
 
-                <div class="flex items-center justify-between mb-4">
+                <!-- <div class="flex items-center justify-between mb-4">
                     <label class="flex items-center text-sm text-gray-700">
                         <input type="checkbox" class="mr-2" name="remember"> Keep me Signed in
                     </label>
-                    <span class="text-sm text-gray-400 italic">Forgotten your password?</span>
-                </div>
+                </div> -->
 
                 <button type="submit"
                     class="w-full bg-[#C6E7FF] text-[#1b1b1b] font-semibold py-2 px-4 rounded hover:bg-[#FFDDae] transition duration-300">

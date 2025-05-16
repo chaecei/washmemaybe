@@ -21,7 +21,7 @@
         <li class="{{ request()->routeIs('history') ? 'active' : '' }}">
             <a href="{{ route('history') }}" class="nav-link">History</a>
         </li>
-        <li class="{{ request()->routeIs('expenses') ? 'active' : '' }}">
+        <li class="{{ request()->routeIs('expenses.index') ? 'active' : '' }}">
             <a href="{{ route('expenses.index') }}" class="nav-link">Expenses</a>
         </li>
         <li class="{{ request()->routeIs('notifications') ? 'active' : '' }}">

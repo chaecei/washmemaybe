@@ -11,6 +11,8 @@ use App\Models\OrderItem;
 use App\Models\Category;
 use App\Models\Payment;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+
 
 class ServiceController extends Controller
 {
@@ -67,7 +69,12 @@ class ServiceController extends Controller
 
     public function storeOrder(Request $request)
     {
-        $orders = json_decode($request->input('orders'), true);
+        $orders = $request->input('orders');
+
+        if (is_string($orders)) {
+            $orders = json_decode($orders, true);
+        }
+
         $request->merge(['orders' => $orders]);
 
         // Validate incoming data
@@ -168,8 +175,13 @@ class ServiceController extends Controller
             ]);
         }
 
+        $payment = new Payment(); // Assuming you have a Payment model
+        $payment->order_id = $order->id;  // Associate payment with order
+        $payment->amount = $validated['payment_amount'];  // The payment amount from the request
+        $payment->payment_method = $validated['payment_method'];  // The payment method (e.g., 'Cash', 'Credit Card')
+        $payment->save();
+
         Category::create([
-            'service_id' => $order->customer_id,
             'order_id' => $order->id,
             'status' => 'Pending',
             'days_unclaimed' => 0,
@@ -228,7 +240,7 @@ class ServiceController extends Controller
 
     public function orderHistory()
     {
-        $orders = Order::with('customer', 'items')->get();  
+        $orders = Order::with('customer', 'items', )->get();  
 
         // Pass the orders to the view
         return view('history')->with('orders', $orders);
@@ -429,57 +441,67 @@ class ServiceController extends Controller
 
     public function store(Request $request)
     {
-
-        Log::info('Received request data:', $request->all());
-
-         // Validate incoming data (adjust according to your needs)
+        // Log the request data for debugging purposes
+        Log::info('Received order data', $request->all());
+        
+        // Decode and validate JSON input
         $data = $request->validate([
             'customer_info' => 'required|array',
             'orders' => 'required|array',
-            // Add further validation rules if needed
+            'grand_total' => 'required|numeric'
         ]);
 
-        // Retrieve customer information
         $customerInfo = $data['customer_info'];
         $orders = $data['orders'];
 
-        // Create or find customer record (ensure customer is unique by their info or create new)
-        $customer = Customer::create([
-            'first_name' => $customerInfo['first_name'],
-            'last_name' => $customerInfo['last_name'],
-            'mobile_number' => $customerInfo['mobile_number']
-        ]);
-
-        // Iterate over orders and save each one
-        foreach ($orders as $orderData) {
-            $orderItem = new OrderItem();
-            $orderItem->service_type = $orderData['service_type'];
-            $orderItem->total_load = $orderData['total_load'];
-            $orderItem->detergent = $orderData['detergent'];
-            $orderItem->softener = $orderData['softener'];
-            $orderItem->customer_id = $customer->id;  // Associate the order with the customer
-            $orderItem->save();
-        }
-
         DB::beginTransaction();
         try {
-            foreach ($orders as $orderData) {
-                $orderItem = new OrderItem();
-                $orderItem->service_type = $orderData['service_type'];
-                $orderItem->total_load = $orderData['total_load'];
-                $orderItem->detergent = $orderData['detergent'];
-                $orderItem->softener = $orderData['softener'];
-                $orderItem->customer_id = $customer->id;
-                $orderItem->save();
-            }
-            DB::commit(); // Commit the transaction
-        } catch (\Exception $e) {
-            DB::rollBack(); // Rollback the transaction in case of an error
-            throw $e; // Optionally rethrow the error
-        }
+            // Create or find the customer using mobile number
+            $customer = Customer::firstOrCreate(
+                ['mobile_number' => $customerInfo['mobile_number']],
+                [
+                    'first_name' => $customerInfo['first_name'],
+                    'last_name' => $customerInfo['last_name']
+                ]
+            );
 
-        // Send a response back
-        return response()->json(['success' => true, 'message' => 'Order saved successfully.']);
+            // Create order for the customer
+            $order = Order::create([
+                'customer_id' => $customer->id,
+                'grand_total' => $data['grand_total']
+            ]);
+
+            Category::create([
+                'order_id' => $order->id,
+                'status' => 'Pending',
+                'days_unclaimed' => 0,
+            ]);
+
+            Notification::create([
+                'type' => 'order_created',
+                'message' => 'A new order was added.',
+            ]);
+
+            // Add each order item
+            foreach ($data['orders'] as $orderItem) {
+                 $order->items()->create([
+                    'service_type' => $orderItem['service_type'],
+                    'total_load' => $orderItem['total_load'],
+                    'detergent' => $orderItem['detergent'],
+                    'softener' => $orderItem['softener'],
+                    'total_load_price' => $orderItem['total_load_price'] ?? 0,
+                    'detergent_price' => $orderItem['detergent_price'] ?? 0,
+                    'softener_price' => $orderItem['softener_price'] ?? 0,
+                ]);
+            }
+
+            DB::commit();
+            return response()->json(['success' => true, 'message' => 'Order saved successfully.']);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Order save failed: ' . $e->getMessage());
+            return response()->json(['success' => false, 'message' => 'Error saving order.'], 500);
+        }
     }
 
 }

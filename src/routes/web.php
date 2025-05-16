@@ -60,7 +60,7 @@ Route::middleware(['auth'])->group(function () {
 
     
     // Route::get('/payment/{order}', [ServiceController::class, 'showPayment'])->name('payment.show');
-    Route::get('/payments', [ServiceController::class, 'show']); 
+    // Route::get('/payments', [ServiceController::class, 'show']); 
     Route::post('/payments', [PaymentController::class, 'store'])->name('payments.store');
 
 
@@ -73,7 +73,7 @@ Route::middleware(['auth'])->group(function () {
     
     Route::resource('expenses', ExpenseController::class)->except(['show']);
 
-    Route::post('/order/save', [ServiceController::class, 'store']);
+    Route::post('/order/save', [ServiceController::class, 'store'])->name('order.save');
 
     // Route::resource('services', ServiceController::class);
 
