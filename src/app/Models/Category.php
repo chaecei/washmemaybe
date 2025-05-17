@@ -17,6 +17,7 @@ class Category extends Model
         'days_unclaimed',
         'picked_up_at',
     ];
+    public $timestamps = true;
 
     public function orders()
     {

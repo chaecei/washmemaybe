@@ -245,11 +245,11 @@ a {
     display: flex;
     justify-content: space-between;
 }
-
 .chart-container {
-    width: 48%;
-    height: 450px;
-    margin: 0 2%;
+  width: 48%;
+  max-width: 800px;
+  height: 450px;
+  margin: 0 2%;
 }
 
 .circle-card {

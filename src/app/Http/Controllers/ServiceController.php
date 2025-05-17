@@ -107,7 +107,7 @@ class ServiceController extends Controller
                 case 'Regular': $orderItem['softener_price'] = 10; break;
                 case 'Floral': $orderItem['softener_price'] = 20; break;
                 case 'Baby Powder': $orderItem['softener_price'] = 20; break;
-                case 'Unscented':
+                case 'Unscented': $orderItem['softener_price'] = 0; break;
                 case 'No Softener': $orderItem['softener_price'] = 0; break;
                 default: $orderItem['softener_price'] = 0;
             }
@@ -228,13 +228,21 @@ class ServiceController extends Controller
         return response()->json([
             'success' => true,
             'order_id' => $order->id,
-            'first_name' => $order->first_name,
-            'last_name' => $order->last_name,
-            'mobile_number' => $order->mobile_number,
-            'total_load' => $order->total_load,
-            'detergent' => $order->detergent,
-            'softener' => $order->softener,
+            'first_name' => $order->customer->first_name,
+            'last_name' => $order->customer->last_name,
+            'mobile_number' => $order->customer->mobile_number,
             'grand_total' => $order->grand_total,
+            'items' => $order->items->map(function ($item) {
+                return [
+                    'total_load' => $item->total_load,
+                    'detergent' => $item->detergent,
+                    'softener' => $item->softener,
+                    'service_type' => $item->service_type,
+                    'total_load_price' => $item->total_load_price,
+                    'detergent_price' => $item->detergent_price,
+                    'softener_price' => $item->softener_price,
+                ];
+            }),
         ]);
     }
 

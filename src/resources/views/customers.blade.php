@@ -7,21 +7,9 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link rel="stylesheet" href="{{ asset('css/dashboard.css') }}">
-    <!-- Toastify CSS -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
 
-    <!-- Toastify JS -->
-    <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
 </head>
 <body>
-    <style>
-    .card.shadow-6 {
-        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
-    }
-    #ordersTable th, #ordersTable td {
-        text-align: center;
-    }
-    </style>
 
 <div class="sidebar">
         <ul>
@@ -69,52 +57,37 @@
       <img src="{{ asset('images/title.png') }}" alt="Header Image" class="header-image">
     </div>
 
-    <!-- Order Summary Table Section -->
     <div class="container mt-5">
-        <!-- Adding the shadow to the card -->
         <div class="card shadow-6 p-4 rounded">
-            <div class="card-body">
-                <table id="ordersTable" class="table table-bordered table-striped">
+            <div class="table-responsive">
+
+                <table id="customersTable" class="table table-bordered">
                     <thead>
                         <tr>
-                            <th class="text-center">Service Number</th>
-                            <th class="text-center">Customer Name</th>
-                            <th class="text-center">Date Dropped Off</th>
-                            <th class="text-center">Time</th>
-                            <th class="text-center">Total Load</th>
-                            <th class="text-center">Service Type</th>
-                            <th class="text-center">Grand Total</th>
+                            <th>ID</th>
+                            <th>Full Name</th>
+                            <th>Mobile Number</th>
+                            <th>Orders Count</th>
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach($orders as $order)
+                        @forelse ($customers as $customer)
                             <tr>
-                                <td class="text-center">{{ $order->id }}</td>
-                                <td class="text-center">{{ $order->customer->first_name }} {{ $order->customer->last_name }}</td>
-                                <td class="text-center">{{ $order->created_at->format('m/d/Y') }}</td>
-                                <td class="text-center">{{ $order->created_at->format('H:i') }}</td>
-                                
-                                <td class="text-center">
-                                    @foreach($order->items as $item)
-                                        {{ $item->total_load }}<br> <!-- Display total load -->
-                                    @endforeach
-                                </td>
-
-                                <td class="text-center">
-                                    @foreach($order->items as $item)
-                                        {{ $item->service_type }}<br> <!-- Display service type -->
-                                    @endforeach
-                                </td>
-
-                                <td class="text-center">₱{{ number_format($order->grand_total, 2) }}</td>
+                                <td>{{ $customer['id'] }}</td>
+                                <td>{{ $customer['name'] }}</td>
+                                <td>{{ $customer['mobile_number'] }}</td>
+                                <td>{{ $customer['orders_count'] }}</td>
                             </tr>
-                        @endforeach
+                        @empty
+                            <tr>
+                                <td colspan="4">No customers found.</td>
+                            </tr>
+                        @endforelse
                     </tbody>
                 </table>
             </div>
         </div>
     </div>
-
 
 <!-- jQuery (required for DataTables) -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -124,16 +97,55 @@
 <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
 <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
 
-<!-- Initialize DataTable -->
 <script>
     $(document).ready(function () {
-        $('#ordersTable').DataTable({
-            "pageLength": 10,
+        $('#customersTable').DataTable({
+            "pageLength": 12,
             "lengthChange": false,
+            "searching": true,
             "ordering": true
         });
     });
 </script>
 
+<script>
+    document.addEventListener('DOMContentLoaded', async () => {
+        try {
+            const response = await fetch('/customers'); // Make sure this route exists
+            const result = await response.json();
 
-</body>
+            if (!result.data || !Array.isArray(result.data)) {
+                throw new Error('Invalid response format.');
+            }
+
+            const customers = result.data;
+
+            const tbody = document.querySelector('#customersTable tbody');
+            if (!tbody) {
+                console.error('Table body not found');
+                return;
+            }
+
+            tbody.innerHTML = '';
+
+            customers.forEach(customer => {
+                const row = `
+                    <tr>
+                        <td>${customer.id}</td>
+                        <td>${customer.name}</td>
+                        <td>${customer.mobile_number}</td>
+                        <td>${customer.orders_count}</td>
+                    </tr>`;
+                tbody.insertAdjacentHTML('beforeend', row);
+            });
+
+        } catch (error) {
+            console.error('Failed to load customers:', error);
+        }
+    });
+</script>
+
+
+
+
+    

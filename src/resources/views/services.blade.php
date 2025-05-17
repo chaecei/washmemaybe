@@ -83,6 +83,9 @@
         <li class="{{ request()->routeIs('account.settings') ? 'active' : '' }}">
             <a href="{{ route('account.settings') }}" class="nav-link">Account Information</a>
         </li>
+        <li class="{{ request()->routeIs('customers') ? 'active' : '' }}">
+            <a href="{{ route('customers') }}" class="nav-link">Customers</a>
+        </li>
             <li>
                 <a href="#" class="logout-link no-hover" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
                 Logout
@@ -129,7 +132,15 @@
                                 </div>
                                 <div class="mb-3">
                                     <label class="form-label">Mobile Number</label>
-                                    <input type="text" name="mobile_number" class="form-control" placeholder="09xxxxxxxxx" maxlength="11" required />
+                                    <input
+                                        type="text"
+                                        name="mobile_number"
+                                        id="mobile_number"
+                                        class="form-control"
+                                        placeholder="09xxxxxxxxx"
+                                        maxlength="11"
+                                        required
+                                    />
                                 </div>
                             </div>
                         </div>
@@ -157,14 +168,15 @@
                                 <div class="mb-3">
                                     <label class="form-label">Service Type:</label><br />
                                     <div class="form-check form-check-inline">
-                                        <input class="form-check-input service-type" name="service_type_1" type="radio" value="Wash and Fold" />
+                                        <input class="form-check-input service-type" name="service_type" type="radio" value="Wash and Fold" />
                                         <label class="form-check-label">Wash and Fold</label>
                                     </div>
                                     <div class="form-check form-check-inline">
-                                        <input class="form-check-input service-type" name="service_type_2" type="radio" value="Wash and Iron" />
+                                        <input class="form-check-input service-type" name="service_type" type="radio" value="Wash and Iron" />
                                         <label class="form-check-label">Wash and Iron</label>
                                     </div>
                                 </div>
+
 
                                 <!-- Total Load -->
                                 <div class="mb-3 hidden total-load-group">
@@ -249,7 +261,10 @@
                     </div>
 
                     <div class="modal-footer">
-                        <button type="button" id="submitPaymentButton" class="btn btn-primary">Submit Payment</button>
+                        <button id="submitPaymentButton" type="submit">
+                            <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+                            <span class="btn-text">Submit</span>
+                        </button>
                     </div>
                 </form>
             </div>
@@ -261,6 +276,47 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+
+<script>
+    const input = document.getElementById("mobile_number");
+
+    // Set default value
+    input.value = "09";
+
+    // Prevent deletion of the default "09"
+    input.addEventListener("keydown", function (e) {
+        // Prevent deleting or moving cursor before index 2
+        if ((input.selectionStart <= 2 && (e.key === "Backspace" || e.key === "Delete")) || 
+            (e.key === "ArrowLeft" && input.selectionStart <= 2)) {
+            e.preventDefault();
+        }
+    });
+
+    // Prevent editing before index 2
+    input.addEventListener("keypress", function (e) {
+        if (input.selectionStart < 2) {
+            e.preventDefault();
+        }
+
+        // Prevent typing more than 9 digits after "09"
+        if (input.value.length >= 11) {
+            e.preventDefault();
+        }
+
+        // Only allow numeric characters
+        if (!/\d/.test(e.key)) {
+            e.preventDefault();
+        }
+    });
+
+    // Ensure value always starts with "09"
+    input.addEventListener("input", function () {
+        if (!input.value.startsWith("09")) {
+            input.value = "09";
+        }
+    });
+</script>
 
 <script>
     function addOrder() {
@@ -309,22 +365,36 @@
 <script>
     let orderCount = 1;
 
+    
     function addOrder() {
         const orderTemplate = document.getElementById("orderTemplate").content.cloneNode(true);
-        orderTemplate.querySelector(".order-number").innerText = orderCount;
+        const orderBlock = orderTemplate.querySelector(".order-block");
 
-        // Listener for service type toggle (if needed later for UI display)
-        orderTemplate.querySelectorAll(".service-type").forEach(option => {
-            option.addEventListener('change', function () {
-                toggleOrderFields(this.closest('.order-block'));
+        // Set the order number
+        orderBlock.querySelector(".order-number").innerText = orderCount;
+
+        // Update all radio inputs to share the same 'name' so only one can be selected per order
+        const serviceTypeInputs = orderBlock.querySelectorAll(".service-type");
+        serviceTypeInputs.forEach((input, index) => {
+            input.name = `service_type_${orderCount}`; // unique name per order
+        });
+
+        // Add change listener to show fields when a service type is selected
+        serviceTypeInputs.forEach(input => {
+            input.addEventListener("change", function () {
+                toggleOrderFields(orderBlock);
             });
         });
 
-        document.getElementById('orderContainer').appendChild(orderTemplate);
-        orderCount++;
+        // Append the new order
+        document.getElementById("orderContainer").appendChild(orderTemplate);
 
+        // Enable submit button after adding at least one order
         document.getElementById("submitServiceBtn").disabled = false;
+
+        orderCount++;
     }
+
 
     function toggleOrderFields(orderBlock) {
         const totalLoadGroup = orderBlock.querySelector(".total-load-group");
@@ -458,6 +528,9 @@
         $("#submitPaymentButton").click(function (e) {
             e.preventDefault();
 
+
+            $(this).prop("disabled", true);
+
             const customerInfo = {
                 first_name: $("input[name='first_name']").val(),
                 last_name: $("input[name='last_name']").val(),
@@ -492,18 +565,21 @@
                 }),
                 success: function (response) {
                     if (response.success) {
+                        $("#paymentModal").modal('hide');
                         alert("Order saved successfully!");
+                        window.location.href = "{{ route('dashboard') }}"; 
                     } else {
-                        alert("Failed to save the order.");
+                        alert("Failed to save the order."); 
+                        $("#submitPaymentButton").prop('disabled', false);
                     }
                 },
                 error: function (xhr) {
                     console.error(xhr.responseText);
                     alert("Error saving the order.");
-                }
+                    $("#submitPaymentButton").prop('disabled', false);
+                },
             });
         });
-
         function showCalculationError(message) {
             $("#paymentErrors").text(message);
         }

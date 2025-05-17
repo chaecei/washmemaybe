@@ -30,6 +30,9 @@
         <li class="{{ request()->routeIs('account.settings') ? 'active' : '' }}">
             <a href="{{ route('account.settings') }}" class="nav-link">Account Information</a>
         </li>
+        <li class="{{ request()->routeIs('customers') ? 'active' : '' }}">
+            <a href="{{ route('customers') }}" class="nav-link">Customers</a>
+        </li>
 
           <li>
             <a href="#" class="logout-link no-hover" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
@@ -58,10 +61,6 @@
     <div class="content-wrapper px-4 py-5">
         <h2 class="mb-4">Laundry Shop Expenses</h2>
 
-        @if(session('success'))
-            <div class="alert alert-success">{{ session('success') }}</div>
-        @endif
-
         {{-- CREATE & EDIT FORM --}}
         @if($mode === 'create' || $mode === 'edit')
             <div class="card mb-4">
@@ -76,28 +75,38 @@
                         <div class="mb-3">
                             <label for="date" class="form-label">Date</label>
                             <input type="date" name="date" class="form-control" id="date"
-                                  value="{{ old('date', $expense->date ?? now()->format('Y-m-d')) }}" required>
+                                value="{{ old('date', $expense->date ?? now()->format('Y-m-d')) }}" required>
                             @error('date') <small class="text-danger">{{ $message }}</small> @enderror
                         </div>
 
-                        <div class="mb-3">
-                            <label for="description" class="form-label">Description</label>
-                            <input type="text" name="description" class="form-control" id="description"
-                                  value="{{ old('description', $expense->description ?? '') }}" required>
-                            @error('description') <small class="text-danger">{{ $message }}</small> @enderror
-                        </div>
-
+                        <!-- CATEGORY DROPDOWN -->
                         <div class="mb-3">
                             <label for="category" class="form-label">Category</label>
-                            <input type="text" name="category" class="form-control" id="category"
-                                  value="{{ old('category', $expense->category ?? '') }}" required>
+                            <select name="category" id="category" class="form-select" required>
+                                <option value="" disabled {{ old('category', $expense->category ?? '') ? '' : 'selected' }}>Select category</option>
+                                <option value="utilities" {{ old('category', $expense->category ?? '') == 'utilities' ? 'selected' : '' }}>Utilities</option>
+                                <option value="washing supplies" {{ old('category', $expense->category ?? '') == 'washing supplies' ? 'selected' : '' }}>Washing Supplies</option>
+                                <option value="equipment maintenance and repairs" {{ old('category', $expense->category ?? '') == 'equipment maintenance and repairs' ? 'selected' : '' }}>Equipment Maintenance and Repairs</option>
+                                <option value="salaries and wages" {{ old('category', $expense->category ?? '') == 'salaries and wages' ? 'selected' : '' }}>Salaries and Wages</option>
+                                <option value="cleaning supplies" {{ old('category', $expense->category ?? '') == 'cleaning supplies' ? 'selected' : '' }}>Cleaning Supplies</option>
+                                <option value="other business expenses" {{ old('category', $expense->category ?? '') == 'other business expenses' ? 'selected' : '' }}>Other Business Expenses</option>
+                            </select>
                             @error('category') <small class="text-danger">{{ $message }}</small> @enderror
+                        </div>
+
+                        <!-- DESCRIPTION (used for sub-category/type input) -->
+                        <div class="mb-3" id="descriptionContainer">
+                            <label for="description" class="form-label">Type</label>
+                            <select name="description" id="description" class="form-select" required>
+                                <!-- options populated by JS -->
+                            </select>
+                            @error('description') <small class="text-danger">{{ $message }}</small> @enderror
                         </div>
 
                         <div class="mb-3">
                             <label for="amount" class="form-label">Amount (₱)</label>
                             <input type="number" step="0.01" name="amount" class="form-control" id="amount"
-                                  value="{{ old('amount', $expense->amount ?? '') }}" required>
+                                value="{{ old('amount', $expense->amount ?? '') }}" required>
                             @error('amount') <small class="text-danger">{{ $message }}</small> @enderror
                         </div>
 
@@ -111,6 +120,8 @@
                 </div>
             </div>
         @endif
+
+
 
         {{-- EXPENSE LIST --}}
         @if($mode === 'index')
@@ -132,28 +143,28 @@
                             <table id="expensesTable" class="table table-bordered table-striped">
                                 <thead class="table-light">
                                     <tr>
-                                        <th>Date</th>
-                                        <th>Description</th>
-                                        <th>Category</th>
-                                        <th>Amount (₱)</th>
-                                        <th>Actions</th>
+                                        <th class="text-center">Date</th>
+                                        <th class="text-center">Type</th>
+                                        <th class="text-center">Category</th>
+                                        <th class="text-center">Amount (₱)</th>
+                                        <th class="text-center">Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     @foreach($expenses as $expense)
                                         <tr>
                                             <td>{{ \Carbon\Carbon::parse($expense->date)->format('M d, Y') }}</td>
-                                            <td>{{ $expense->description }}</td>
-                                            <td>{{ $expense->category }}</td>
+                                            <td>{{ ucfirst($expense->description) }}</td>
+                                            <td>{{ ucfirst($expense->category) }}</td>
                                             <td>₱{{ number_format($expense->amount, 2) }}</td>
                                             <td>
                                                 <a href="{{ route('expenses.edit', $expense->id) }}" class="btn btn-sm btn-warning">
                                                     <i class="fas fa-edit"></i>
                                                 </a>
-                                                <form action="{{ route('expenses.destroy', $expense->id) }}" method="POST" class="d-inline">
+                                                <form action="{{ route('expenses.destroy', $expense->id) }}" method="POST" class="d-inline delete-expense-form">
                                                     @csrf
                                                     @method('DELETE')
-                                                    <button class="btn btn-sm btn-danger" onclick="return confirm('Delete this expense?')">
+                                                    <button type="button" class="btn btn-sm btn-danger delete-expense-btn">
                                                         <i class="fas fa-trash-alt"></i>
                                                     </button>
                                                 </form>
@@ -204,6 +215,115 @@
       }
   });
 </script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const categorySelect = document.getElementById('category');
+        const descriptionContainer = document.getElementById('descriptionContainer');
+
+        // Escape quotes in old value for description
+        const oldDescription = `{{ old('description', $expense->description ?? '') }}`.replace(/"/g, '&quot;');
+
+        const subCategories = {
+            'utilities': ['Electricity Bills', 'Water Bills', 'Internet Cost'],
+            'washing supplies': ['Laundry Detergents', 'Fabric Softeners', 'Stain Removers'],
+            'equipment maintenance and repairs': ['Washing Machine Repair', 'Dryer Repair', 'Other Repairs'],
+            'salaries and wages': ['Monthly Salaries', 'Overtime Pay', 'Bonuses'],
+            'cleaning supplies': ['Cleaning Products'],
+            'other business expenses': [] // special case: text input
+        };
+
+        function populateDescription(selectedCategory, selectedDescription = '') {
+            if (selectedCategory === 'other business expenses') {
+                // Text input for 'Other Business Expenses'
+                descriptionContainer.innerHTML = `
+                    <label for="description" class="form-label">Specify Type</label>
+                    <input type="text" name="description" id="description" class="form-control" value="${selectedDescription}" required>
+                `;
+            } else if (subCategories[selectedCategory]) {
+                // Dropdown for other categories
+                let options = '<option value="" disabled selected>Select type</option>';
+                subCategories[selectedCategory].forEach(item => {
+                    const selected = item === selectedDescription ? 'selected' : '';
+                    options += `<option value="${item}" ${selected}>${item}</option>`;
+                });
+
+                descriptionContainer.innerHTML = `
+                    <label for="description" class="form-label">Type</label>
+                    <select name="description" id="description" class="form-select" required>
+                        ${options}
+                    </select>
+                `;
+            } else {
+                // Clear description input if no category selected
+                descriptionContainer.innerHTML = '';
+            }
+        }
+
+        categorySelect.addEventListener('change', (e) => {
+            populateDescription(e.target.value);
+        });
+
+        // Populate on page load (edit form or after validation error)
+        populateDescription(categorySelect.value, oldDescription);
+    });
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const deleteButtons = document.querySelectorAll('.delete-expense-btn');
+
+        deleteButtons.forEach(button => {
+            button.addEventListener('click', function () {
+                const form = this.closest('form');
+
+                Swal.fire({
+                    title: 'Are you sure?',
+                    text: "You won't be able to revert this!",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#d33',
+                    cancelButtonColor: '#6c757d',
+                    confirmButtonText: 'Yes, delete it!'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        form.submit();
+                    }
+                });
+            });
+        });
+    });
+</script>
+
+@if(session('success'))
+    <script>
+        document.addEventListener('DOMContentLoaded', async function () {
+            const message = @json(session('success'));
+
+            let title = 'Success';
+            let icon = 'success';
+
+            if (message.toLowerCase().includes('deleted')) {
+                title = 'Deleted';
+            } else if (message.toLowerCase().includes('added')) {
+                title = 'Added';
+            } else if (message.toLowerCase().includes('updated')) {
+                title = 'Updated';
+            }
+
+            await Swal.fire({
+                icon: icon,
+                title: title,
+                text: message,
+                timer: 2000,
+                showConfirmButton: false
+            });
+        });
+    </script>
+@endif
+
 
 </body>
 </html>

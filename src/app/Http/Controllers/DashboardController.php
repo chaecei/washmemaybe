@@ -12,32 +12,55 @@ class DashboardController extends Controller
 {
     public function index()
     {
-        // Fetch the orders and the related items and category (as you already have)
+        // Fetch the orders and the related items and category
         $orders = Order::with(['items', 'category'])
                     ->latest()
                     ->take(10)
                     ->get();
 
-        // Calculate the total of all orders
-        $grandTotal = Order::sum('grand_total');  // This will calculate the sum of all 'grand_total'
+        // Calculate the total of orders only for the current week
+        $grandTotal = Order::whereBetween('created_at', [
+            now()->startOfWeek(),
+            now()->endOfWeek()
+        ])->sum('grand_total');
 
         $expenses = Expense::all();
 
-        // Pass the orders and grand total to the view
+        // Pass the data to the view
         return view('dashboard', compact('orders', 'grandTotal', 'expenses'))->with('mode', 'index');
     }
 
-
     public function getByStatus($status)
     {
-        $orders = Order::with('category')
-                    ->whereHas('category', function($query) use ($status) {
-                        $query->where('status', $status);
-                    })
-                    ->orderBy('created_at', 'desc')
-                    ->get();
+        $orders = Order::whereHas('category', function($query) use ($status) {
+                            $query->where('status', $status);
+                        })
+                        ->with(['category:id,order_id,status,updated_at']) // ensure updated_at is loaded
+                        ->get()
+                        ->sortByDesc(fn($order) => $order->category->updated_at)
+                        ->values(); // reset keys
 
         return response()->json($orders);
+    }
+
+    public function getDashboardData()
+    {
+        $orderItems = OrderItem::all();
+
+        $grandTotal = 0;
+
+        foreach ($orderItems as $item) {
+            $totalLoadPrice = floatval($item->total_load_price ?? 0);
+            $detergentPrice = floatval($item->detergent_price ?? 0);
+            $softenerPrice = floatval($item->softener_price ?? 0);
+
+            $grandTotal += $totalLoadPrice + $detergentPrice + $softenerPrice;
+        }
+
+        return response()->json([
+            'data' => $orderItems,
+            'grand_total' => number_format($grandTotal, 2),
+        ]);
     }
 
     public function updateStatus(Request $request, $order_id)
@@ -84,29 +107,45 @@ class DashboardController extends Controller
         ]);
     }
 
-    public function getWeeklyOrders()
+    public function getWeeklyOrders(Request $request)
     {
-        $startOfWeek = Carbon::now()->startOfWeek();
-        $endOfWeek = Carbon::now()->endOfWeek();
+        // Parse the week input (format: "2025-W21")
+        if ($request->has('week')) {
+            $week = $request->input('week'); // e.g., 2025-W21
+            [$year, $weekNumber] = explode('-W', $week);
 
+            // Get the start of the week
+            $startOfWeek = Carbon::now()->setISODate($year, $weekNumber)->startOfWeek();
+        } else {
+            $startOfWeek = Carbon::now()->startOfWeek();
+        }
+
+        $endOfWeek = (clone $startOfWeek)->endOfWeek();
+
+        // Group orders by day of the week
         $orders = Order::whereBetween('created_at', [$startOfWeek, $endOfWeek])
             ->get()
             ->groupBy(function ($order) {
-                return Carbon::parse($order->created_at)->format('l'); // e.g., 'Monday'
+                return Carbon::parse($order->created_at)->format('l'); // 'Monday', 'Tuesday', etc.
             });
 
         $weekDays = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-
         $data = [];
+
         foreach ($weekDays as $day) {
             $data[] = isset($orders[$day]) ? count($orders[$day]) : 0;
         }
 
+        // Human-readable label, e.g., "May 4–11"
+        $weekLabel = $startOfWeek->format('M j') . ' – ' . $endOfWeek->format('j');
+
         return response()->json([
             'labels' => $weekDays,
             'data' => $data,
+            'week_label' => $weekLabel
         ]);
     }
+
 
 
 

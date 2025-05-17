@@ -21,6 +21,12 @@ class Order extends Model
         'grand_total',
     ];
 
+      protected $casts = [
+        'grand_total' => 'float', // ensures 2 decimal places
+    ];
+    
+    public $timestamps = true;
+
     /**
      * Define the inverse relationship: Each order belongs to one customer.
      */
@@ -33,7 +39,6 @@ class Order extends Model
         return $this->hasOne(Category::class, 'order_id');
     }
 
-
     public function payment()
     {
         return $this->hasOne(Payment::class);
@@ -44,7 +49,7 @@ class Order extends Model
         return $this->hasMany(OrderItem::class);
     }
 
-    public function getGrandTotalAttribute()
+    public function getCalculatedGrandTotalAttribute()
     {
         return optional($this->items)->sum(function ($item) {
             return $item->total_load_price + $item->detergent_price + $item->softener_price;

@@ -10,6 +10,7 @@ use App\Http\Controllers\ServiceController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ExpenseController;
+use App\Http\Controllers\CustomerController;
 
 
 // Redirect root to register page
@@ -75,6 +76,17 @@ Route::middleware(['auth'])->group(function () {
 
     Route::post('/order/save', [ServiceController::class, 'store'])->name('order.save');
 
+    Route::get('/customers', [CustomerController::class, 'index'])->name('customers');
+
+    Route::get('/orders/counts', function () {
+        return response()->json([
+            'Pending' => \App\Models\Order::whereHas('category', fn($q) => $q->where('status', 'Pending'))->count(),
+            'Processing' => \App\Models\Order::whereHas('category', fn($q) => $q->where('status', 'Processing'))->count(),
+            'Ready for Pickup' => \App\Models\Order::whereHas('category', fn($q) => $q->where('status', 'Ready for Pickup'))->count(),
+            'Unclaimed' => \App\Models\Order::whereHas('category', fn($q) => $q->where('status', 'Unclaimed'))->count(),
+        ]);
+    });
+    
     // Route::resource('services', ServiceController::class);
 
     // Category Tables

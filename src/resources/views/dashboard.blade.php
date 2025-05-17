@@ -9,6 +9,13 @@
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
     <link rel="stylesheet" href="{{ asset('css/dashboard.css') }}">
     <meta name="csrf-token" content="{{ csrf_token() }}">
+<style>
+  #weekSelector:focus {
+    box-shadow: 0 0 0 0.25rem rgba(38, 120, 192, 0.25);
+    border-color: #2678c0;
+    outline: none;
+  }
+</style>
 
 </head>
 
@@ -32,6 +39,9 @@
         </li>
         <li class="{{ request()->routeIs('account.settings') ? 'active' : '' }}">
             <a href="{{ route('account.settings') }}" class="nav-link">Account Information</a>
+        </li>
+        <li class="{{ request()->routeIs('customers') ? 'active' : '' }}">
+            <a href="{{ route('customers') }}" class="nav-link">Customers</a>
         </li>
 
           <li>
@@ -62,40 +72,36 @@
                 <div class="card card-pending" id="card-pending">
                     <div class="card-body">
                         <h5 class="card-title">Pending</h5>
-                        <p class="card-text h4">9</p>
+                        <p class="card-text h4" id="count-pending">0</p>
                     </div>
                 </div>
-            </a>
         </div>
     
         <div class="col-md-3">
                 <div class="card card-processing" id="card-processing">
                     <div class="card-body">
                         <h5 class="card-title">Processing</h5>
-                        <p class="card-text h4">4</p>
+                        <p class="card-text h4" id="count-processing">0</p>
                     </div>
                 </div>
-            </a>
         </div>
 
         <div class="col-md-3">
                 <div class="card card-ready" id="card-ready">
                     <div class="card-body">
                         <h5 class="card-title">Ready for Pickup</h5>
-                        <p class="card-text h4">2</p>
+                        <p class="card-text h4" id="count-ready">0</p>
                     </div>
-                </div>
-            </a>    
+                </div>  
         </div>
 
         <div class="col-md-3">
                 <div class="card card-completed" id="card-unclaimed">
                     <div class="card-body">
                         <h5 class="card-title">Unclaimed</h5>
-                        <p class="card-text h4">2</p>
+                        <p class="card-text h4" id="count-unclaimed">0</p>
                     </div>
                 </div>
-            </a>
         </div>
     </div>
 
@@ -125,7 +131,7 @@
                                     <td>
                                         {{ $order->picked_up_at ? $order->picked_up_at->format('M d, Y h:i A') : 'Not yet picked up' }}
                                     </td>
-                                    <td>₱{{ number_format($order->grand_total, 2) }}</td>
+                                    <td>₱{{ number_format($order->grand_total ?? 0, 2) }}</td>
                                 </tr>
                             @endforeach
                         </tbody>
@@ -142,35 +148,56 @@
         <div id="table-container" class="flex-grow-1" style="display: none;"></div>
     </div>
 
-    <div style="max-width: 1600px; margin: 0 auto;">
-        <div style="display: flex; gap: 30px; justify-content: center; align-items: center; flex-wrap: wrap; padding: 20px;">
-            
-            <!-- Weekly Reports Chart Card -->
-            <div id="weeklyOrders" class="card mt-4" style="flex: 1 1 48%; max-width: 800px; border-radius: 15px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);">
-                <div class="card-header">
-                    Weekly Reports
-                </div>
-                <div class="card-body" style="padding: 0;">
-                    <div class="chart-container" style="height: 500px; width: 100%; display: flex; justify-content: center; align-items: center; padding: 15px;">
-                        <canvas id="weeklyOrdersChart" style="width: 100% !important; height: 100% !important;"></canvas>
-                    </div>
-                </div>
-            </div>
 
-            <!-- Expenses Chart Card -->
-            <div id="totalExpenses" class="card mt-4" style="flex: 1 1 48%; max-width: 800px; border-radius: 15px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);">
-                <div class="card-header">
-                    Expenses Chart
-                </div>
-                <div class="card-body" style="padding: 0;">
-                    <div class="chart-container" style="height: 500px; width: 100%; display: flex; justify-content: center; align-items: center; padding: 15px;">
-                        <canvas id="expenseChart" style="width: 100% !important; height: 100% !important;"></canvas>
-                    </div>
-                </div>
+    <!-- Charts Container -->
+    <div class="d-flex flex-wrap justify-content-center align-items-start gap-4 px-3">
+    
+    <!-- Left Column: Stacked Bar Charts -->
+    <div style="flex: 1 1 60%; min-width: 300px; max-width: 1000px;" id="chartContainer">
+        <div class="row mb-4">
+            <div class="col-md-7" style="margin-left: 45px">
+                <label for="weekSelector" class="form-label fw-bold mb-2" style="font-size: 1.1rem;">Select a Week</label>
+                <input
+                type="week"
+                id="weekSelector"
+                class="form-control shadow-sm rounded-3 px-3 py-2 border-1 border-primary"
+                style="transition: box-shadow 0.3s ease, border-color 0.3s ease;"
+                />
+                <h5 id="weekLabel" class="text-center mt-3 fw-bold"></h5>
             </div>
+        </div>
+        
+        <!-- Weekly Reports Chart -->
+        <div class="card mb-4" style="border-radius: 15px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);">
+        <div class="card-header">Weekly Reports</div>
+        <div class="card-body" style="height: 400px;">
+            <canvas id="weeklyOrdersChart"></canvas>
+        </div>
+        </div>
+
+        <!-- Expenses Chart -->
+        <div class="card" style="border-radius: 15px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);">
+        <div class="card-header">Expenses Chart</div>
+        <div class="card-body" style="height: 400px;">
+            <canvas id="expenseChart"></canvas>
+        </div>
         </div>
     </div>
 
+    <!-- Right Column: Tall Pie Chart -->
+    <div style="flex: 1 1 30%; min-width: 300px; max-width: 500px;" id="pieContainer">
+        <div class="card" style="height: 970px; border-radius: 15px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);">
+        <div class="card-header">Pie Chart</div>
+        <div class="card-body d-flex justify-content-center align-items-center">
+            <canvas id="pieChart" style="width: 100%; height: 100%;"></canvas>
+        </div>
+        </div>
+    </div>
+
+
+<div id="defaultView" style="display: block;"></div>
+<div id="table-container" style="display: none;"></div>
+<div id="totalEarningsCard" style="display: block;"></div>
 
 
 
@@ -183,37 +210,60 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', function () {
-        fetch('/dashboard/weekly-orders')
-            .then(response => response.json())
-            .then(data => {
-                const ctx = document.getElementById('weeklyOrdersChart').getContext('2d');
-                new Chart(ctx, {
-                    type: 'bar',
-                    data: {
-                        labels: data.labels,
-                        datasets: [{
-                            label: 'Number of Orders',
-                            data: data.data,
-                            backgroundColor: 'rgba(38, 120, 192, 0.8)',
-                            borderColor: 'rgba(54, 162, 235, 1)',
-                            borderWidth: 2
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        scales: {
-                            y: {
-                                beginAtZero: true,
-                                ticks: {
-                                    stepSize: 1
+        const weekInput = document.getElementById('weekSelector');
+        const ctx = document.getElementById('weeklyOrdersChart').getContext('2d');
+        let chart; // Keep reference to the chart
+
+        function fetchAndRenderChart(week = null) {
+            let url = '/dashboard/weekly-orders';
+            if (week) {
+                url += `?week=${week}`;
+            }
+
+            fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    renderPieChart(data.expenseLabels, data.expenseData);
+
+                    if (chart) chart.destroy(); // Destroy old chart before creating new one
+                    chart = new Chart(ctx, {
+                        type: 'bar',
+                        data: {
+                            labels: data.labels,
+                            datasets: [{
+                                label: 'Number of Orders',
+                                data: data.data,
+                                backgroundColor: 'rgba(38, 120, 192, 0.8)',
+                                borderColor: 'rgba(54, 162, 235, 1)',
+                                borderWidth: 2
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            scales: {
+                                y: {
+                                    beginAtZero: true,
+                                    ticks: {
+                                        stepSize: 1
+                                    }
                                 }
                             }
                         }
-                    }
-                });
-            })
-            .catch(error => console.error('Error loading chart:', error));
+                    });
+                })
+                .catch(error => console.error('Error loading chart:', error));
+        }
+
+        // Initial load (current week)
+        fetchAndRenderChart();
+
+        // Change event for filter
+        weekInput.addEventListener('change', function () {
+            fetchAndRenderChart(this.value);
+        });
     });
+
 </script>
 
 @if($mode === 'index')
@@ -256,6 +306,50 @@
     </script>
 @endif
 
+<script>
+    let pieChart; // to hold the pie chart reference
+
+    function renderPieChart(labels, data) {
+        const ctx = document.getElementById('pieChart').getContext('2d');
+
+        if (pieChart) pieChart.destroy();
+
+        pieChart = new Chart(ctx, {
+            type: 'pie',
+            data: {
+                labels: labels,
+                datasets: [{
+                    data: data,
+                    backgroundColor: [
+                        '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0',
+                        '#9966FF', '#FF9F40', '#7FDBFF', '#B10DC9'
+                    ]
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'bottom'
+                    }
+                }
+            }
+        });
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const categoryTotals = {};
+        @foreach($expenses as $exp)
+            categoryTotals["{{ $exp->category }}"] = (categoryTotals["{{ $exp->category }}"] || 0) + {{ $exp->amount }};
+        @endforeach
+
+        const pieLabels = Object.keys(categoryTotals);
+        const pieData = Object.values(categoryTotals);
+
+        renderPieChart(pieLabels, pieData);
+    });
+</script>
+
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
@@ -271,8 +365,8 @@
                 document.getElementById('table-container').innerHTML = '<p></p>';
                 document.getElementById('table-container').style.display = 'block';
                 document.getElementById('totalEarningsCard').style.display = 'none';
-                document.getElementById('weeklyOrders').style.display = 'none';
-                document.getElementById('totalExpenses').style.display = 'none';
+                document.getElementById('chartContainer').style.display = 'none';
+                document.getElementById('pieContainer').style.display = 'none';
 
 
                 const url = pageUrl || `/orders/status/${encodeURIComponent(status)}`;
@@ -318,7 +412,7 @@
                             </span></td>
                             <td>₱${order.grand_total.toFixed(2)}</td>
                             <td>${new Date(order.created_at).toLocaleString()}</td>
-                            <td>${new Date(order.updated_at).toLocaleString()}</td>
+                            <td>${new Date(order.category.updated_at).toLocaleString()}</td>
                             <td>${getActionButtons(order)}</td>
                         </tr>`;
                 });
@@ -372,6 +466,35 @@
         }
     });
 
+    updateCardCounts();
+
+        async function updateCardCounts() {
+            const statuses = ['Pending', 'Processing', 'Ready for Pickup', 'Unclaimed'];
+            for (const status of statuses) {
+                try {
+                    const response = await fetch(`/orders/status/${encodeURIComponent(status)}`);
+                    if (!response.ok) throw new Error('Network error');
+                    const result = await response.json();
+
+                    const count = Array.isArray(result.data) ? result.data.length : 0;
+
+                    const idMap = {
+                        'Pending': 'count-pending',
+                        'Processing': 'count-processing',
+                        'Ready for Pickup': 'count-ready',
+                        'Unclaimed': 'count-unclaimed'
+                    };
+
+                    const countElement = document.getElementById(idMap[status]);
+                    if (countElement) {
+                        countElement.textContent = count;
+                    }
+                } catch (error) {
+                    console.error(`Failed to load count for ${status}:`, error);
+                }
+            }
+        }
+
     function resetView() {
         document.getElementById('table-container').style.display = 'none';
         document.getElementById('defaultView').style.display = 'block';
@@ -379,6 +502,11 @@
 
     async function updateOrderStatus(orderId, newStatus) {
         try {
+
+            const button = document.querySelector(`button[onclick*="updateOrderStatus(${orderId}"]`);
+            button.disabled = true;
+            button.innerHTML = `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Updating...`;
+
             const response = await fetch(`/categories/${orderId}/status`, {
                 method: 'PUT',
                 headers: {
@@ -392,7 +520,32 @@
 
             if (response.ok && contentType.includes('application/json')) {
                 const data = await response.json();
-                alert(`Order updated to ${data.category.status}`);
+                
+                // ✅ Success SweetAlert
+                await Swal.fire({
+                    icon: 'success',
+                    title: `Status Updated`,
+                    text: `Order #${orderId} is now marked as "${data.category.status}"`,
+                    timer: 2000,
+                    showConfirmButton: false
+                });
+
+                // ✅ Fade out row
+                const row = button.closest('tr');
+                if (row) {
+                    row.style.transition = 'opacity 0.5s ease-out';
+                    row.style.opacity = 0;
+                    setTimeout(() => row.remove(), 500);
+                }
+
+
+                const activeStatus = document.querySelector('h5.mb-0')?.textContent?.trim();
+                if (activeStatus === `${newStatus} Orders`) {
+                loadStatusTable(newStatus); // refresh target table if currently open
+            }
+
+             updateCardCounts();
+
             } else {
                 const errorText = await response.text();
                 console.error('Server error:', errorText);
@@ -406,6 +559,8 @@
 </script>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
 
 </body>
 </html>
