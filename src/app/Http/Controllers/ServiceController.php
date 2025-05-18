@@ -132,29 +132,26 @@ class ServiceController extends Controller
         }
 
         // Check if customer exists with the provided mobile number
+        // Search for existing customer by mobile number
         $existingCustomer = Customer::where('mobile_number', $validated['mobile_number'])->first();
 
         if ($existingCustomer) {
-            // Check if the existing customer's name matches the provided first and last name
-            if ($existingCustomer->first_name !== $validated['first_name'] || $existingCustomer->last_name !== $validated['last_name']) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Existing phone number but the entered name does not match.',
-                ]);
-
+            // Check name match
+            if (
+                $existingCustomer->first_name !== $validated['first_name'] ||
+                $existingCustomer->last_name !== $validated['last_name']
+            ) {
+                return back()->withErrors([
+                    'mobile_number' => 'This mobile number already exists, but the name does not match.',
+                ])->withInput();
             }
 
-            // Use the existing customer if names match
+            // Reuse existing customer
             $customer = $existingCustomer;
         } else {
-            // Create new customer if no match found
-            $customer = Customer::create([
-                'first_name' => $validated['first_name'],
-                'last_name' => $validated['last_name'],
-                'mobile_number' => $validated['mobile_number'],
-            ]);
+            // Create new customer
+            $customer = Customer::create($validated);
         }
-
         // Create the order and save the grand total in orders table
         $order = new Order();
         $order->customer_id = $customer->id;

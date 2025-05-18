@@ -11,6 +11,7 @@ use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ExpenseController;
 use App\Http\Controllers\CustomerController;
+use App\Http\Controllers\ReportController;
 
 
 // Redirect root to register page
@@ -70,6 +71,8 @@ Route::middleware(['auth'])->group(function () {
     
     // Notification
     Route::get('/notifications/fetch', [NotificationController::class, 'fetch'])->name('notifications.fetch');
+
+    Route::get('/reports', [ReportController::class, 'index'])->name('reports');
 
     
     Route::resource('expenses', ExpenseController::class)->except(['show']);

@@ -23,6 +23,13 @@
         border-radius: 12px;
         box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
         padding: 25px;
+        margin-top: 40px;
+        }
+        .form-container1 {
+        background-color: #ffffff;
+        border-radius: 12px;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
+        padding: 25px;
         }
 
         .order-block {
@@ -86,6 +93,9 @@
         <li class="{{ request()->routeIs('customers') ? 'active' : '' }}">
             <a href="{{ route('customers') }}" class="nav-link">Customers</a>
         </li>
+        <li class="{{ request()->routeIs('reports') ? 'active' : '' }}">
+            <a href="{{ route('reports') }}" class="nav-link">Reports</a>
+        </li>
             <li>
                 <a href="#" class="logout-link no-hover" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
                 Logout
@@ -148,7 +158,7 @@
                         
                         <!-- Order Information -->
                         <div class="col-12 mt-5">
-                            <div class="form-container">
+                            <div class="form-container1">
                                 <h5 class="mb-3">Order Information</h5>
                                 <div id="orderContainer"></div>
                                 <input type="hidden" name="order_id" id="order_id_payment" />

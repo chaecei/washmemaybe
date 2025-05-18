@@ -43,6 +43,9 @@
         <li class="{{ request()->routeIs('customers') ? 'active' : '' }}">
             <a href="{{ route('customers') }}" class="nav-link">Customers</a>
         </li>
+        <li class="{{ request()->routeIs('reports') ? 'active' : '' }}">
+            <a href="{{ route('reports') }}" class="nav-link">Reports</a>
+        </li>
 
           <li>
             <a href="#" class="logout-link no-hover" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
@@ -129,7 +132,10 @@
                                         {{ $order->category->status ?? 'No Status' }}
                                     </td>
                                     <td>
-                                        {{ $order->picked_up_at ? $order->picked_up_at->format('M d, Y h:i A') : 'Not yet picked up' }}
+                                        {{ $order->category && $order->category->status === 'Completed'
+                                            ? $order->category->updated_at->format('M d, Y h:i A')
+                                            : 'Not yet picked up'
+                                        }}
                                     </td>
                                     <td>₱{{ number_format($order->grand_total ?? 0, 2) }}</td>
                                 </tr>
@@ -147,58 +153,6 @@
         </div>
         <div id="table-container" class="flex-grow-1" style="display: none;"></div>
     </div>
-
-
-    <!-- Charts Container -->
-    <div class="d-flex flex-wrap justify-content-center align-items-start gap-4 px-3">
-    
-    <!-- Left Column: Stacked Bar Charts -->
-    <div style="flex: 1 1 60%; min-width: 300px; max-width: 1000px;" id="chartContainer">
-        <div class="row mb-4">
-            <div class="col-md-7" style="margin-left: 45px">
-                <label for="weekSelector" class="form-label fw-bold mb-2" style="font-size: 1.1rem;">Select a Week</label>
-                <input
-                type="week"
-                id="weekSelector"
-                class="form-control shadow-sm rounded-3 px-3 py-2 border-1 border-primary"
-                style="transition: box-shadow 0.3s ease, border-color 0.3s ease;"
-                />
-                <h5 id="weekLabel" class="text-center mt-3 fw-bold"></h5>
-            </div>
-        </div>
-        
-        <!-- Weekly Reports Chart -->
-        <div class="card mb-4" style="border-radius: 15px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);">
-        <div class="card-header">Weekly Reports</div>
-        <div class="card-body" style="height: 400px;">
-            <canvas id="weeklyOrdersChart"></canvas>
-        </div>
-        </div>
-
-        <!-- Expenses Chart -->
-        <div class="card" style="border-radius: 15px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);">
-        <div class="card-header">Expenses Chart</div>
-        <div class="card-body" style="height: 400px;">
-            <canvas id="expenseChart"></canvas>
-        </div>
-        </div>
-    </div>
-
-    <!-- Right Column: Tall Pie Chart -->
-    <div style="flex: 1 1 30%; min-width: 300px; max-width: 500px;" id="pieContainer">
-        <div class="card" style="height: 970px; border-radius: 15px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);">
-        <div class="card-header">Pie Chart</div>
-        <div class="card-body d-flex justify-content-center align-items-center">
-            <canvas id="pieChart" style="width: 100%; height: 100%;"></canvas>
-        </div>
-        </div>
-    </div>
-
-
-<div id="defaultView" style="display: block;"></div>
-<div id="table-container" style="display: none;"></div>
-<div id="totalEarningsCard" style="display: block;"></div>
-
 
 
 
@@ -365,9 +319,6 @@
                 document.getElementById('table-container').innerHTML = '<p></p>';
                 document.getElementById('table-container').style.display = 'block';
                 document.getElementById('totalEarningsCard').style.display = 'none';
-                document.getElementById('chartContainer').style.display = 'none';
-                document.getElementById('pieContainer').style.display = 'none';
-
 
                 const url = pageUrl || `/orders/status/${encodeURIComponent(status)}`;
                 const response = await fetch(url);

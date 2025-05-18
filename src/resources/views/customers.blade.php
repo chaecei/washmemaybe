@@ -34,6 +34,9 @@
         <li class="{{ request()->routeIs('customers') ? 'active' : '' }}">
             <a href="{{ route('customers') }}" class="nav-link">Customers</a>
         </li>
+        <li class="{{ request()->routeIs('reports') ? 'active' : '' }}">
+            <a href="{{ route('reports') }}" class="nav-link">Reports</a>
+        </li>
           <li>
             <a href="#" class="logout-link no-hover" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
               Logout
