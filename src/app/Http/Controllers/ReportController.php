@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Expense;
 use App\Models\Order;
+use App\Models\Category;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 
@@ -13,6 +14,7 @@ class ReportController extends Controller
     public function index(Request $request)
     {
         $year = $request->input('year', now()->year);
+        $categoryLabels = Expense::pluck('category')->toArray();
 
         $minYear = min(
             Order::min(DB::raw('YEAR(created_at)')) ?? now()->year,
@@ -25,48 +27,87 @@ class ReportController extends Controller
             now()->year
         );
         $month = $request->input('month'); // nullable
+        $week = $request->input('week');
 
+        if ($month && !$week) {
+            $week = 1;
+        }
+        
         $months = collect(range(1, 12))
             ->map(fn($month) => Carbon::create()->month($month)->format('F'))
             ->values()   // this resets the keys to 0,1,2,...
             ->toArray();
 
         if ($month) {
-            // Get earnings/expenses for the selected month (grouped by day)
-            $expensesData = Expense::whereYear('date', $year)
-                ->whereMonth('date', $month)
-                ->selectRaw('DAY(date) as day, SUM(amount) as total')
-                ->groupBy('day')
-                ->orderBy('day')
-                ->get();
+            $expensesQuery = Expense::whereYear('date', $year)
+        ->whereMonth('date', $month);
 
-            $earningsData = Order::whereYear('created_at', $year)
-                ->whereMonth('created_at', $month)
-                ->selectRaw('DAY(created_at) as day, SUM(grand_total) as total')
-                ->groupBy('day')
-                ->orderBy('day')
-                ->get();
+        $earningsQuery = Order::whereYear('created_at', $year)
+            ->whereMonth('created_at', $month);
 
+        if ($week) {
+            $weekRanges = [
+                1 => [1, 7],
+                2 => [8, 14],
+                3 => [15, 21],
+                4 => [22, 31],
+            ];
+
+
+            [$startDay, $endDay] = $weekRanges[$week];
+
+            $expensesQuery->whereDay('date', '>=', $startDay)
+                        ->whereDay('date', '<=', $endDay);
+
+            $earningsQuery->whereDay('created_at', '>=', $startDay)
+                        ->whereDay('created_at', '<=', $endDay);
+
+            // Adjust labels for the week instead of full month
+            $labels = collect(range($startDay, $endDay));
+        } else {
             $daysInMonth = Carbon::create($year, (int) $month, 1)->daysInMonth;
             $labels = collect(range(1, $daysInMonth));
+        }
 
-            $dailyExpenses = $labels->map(function ($day) use ($expensesData) {
-                $match = $expensesData->firstWhere('day', $day);
-                return $match ? $match->total : 0;
-            });
+        // Group by day still works whether weekly or full month
+        $expensesData = $expensesQuery->selectRaw('DAY(date) as day, SUM(amount) as total')
+                                    ->groupBy('day')
+                                    ->orderBy('day')
+                                    ->get();
 
-            $dailyEarnings = $labels->map(function ($day) use ($earningsData) {
-                $match = $earningsData->firstWhere('day', $day);
-                return $match ? $match->total : 0;
-            });
+        $earningsData = $earningsQuery->selectRaw('DAY(created_at) as day, SUM(grand_total) as total')
+                                    ->groupBy('day')
+                                    ->orderBy('day')
+                                    ->get();
 
-            // Here’s the fix: ensure chart data has 12 months, only one with real data
-            $expenses = $dailyExpenses;
-            $earnings = $dailyEarnings;
+        $dailyExpenses = $labels->map(function ($day) use ($expensesData) {
+            $match = $expensesData->firstWhere('day', $day);
+            return $match ? $match->total : 0;
+        });
 
-            $totalEarnings = $dailyEarnings->sum();
-            $totalExpenses = $dailyExpenses->sum();
-        } else {
+        $dailyEarnings = $labels->map(function ($day) use ($earningsData) {
+            $match = $earningsData->firstWhere('day', $day);
+            return $match ? $match->total : 0;
+        });
+
+        $expenses = $dailyExpenses;
+        $earnings = $dailyEarnings;
+
+        $totalEarnings = $dailyEarnings->sum();
+        $totalExpenses = $dailyExpenses->sum();
+
+        // ✅ NEW: Group expenses by category (for pie chart/bar chart)
+        $categoryBreakdown = Expense::whereYear('date', $year)
+            ->whereMonth('date', $month)
+            ->when($week, function ($query) use ($weekRanges, $week) {
+                [$startDay, $endDay] = $weekRanges[$week];
+                $query->whereDay('date', '>=', $startDay)
+                    ->whereDay('date', '<=', $endDay);
+            })
+            ->select('category', DB::raw('SUM(amount) as total'))
+            ->groupBy('category')
+            ->get();
+    } else {
             // Expenses grouped by month in the selected year
             $expensesData = Expense::whereYear('date', $year)
                 ->selectRaw('MONTH(date) as month, SUM(amount) as total')

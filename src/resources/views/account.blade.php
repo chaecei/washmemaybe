@@ -7,76 +7,56 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link rel="stylesheet" href="{{ asset('css/dashboard.css') }}">
-    <!-- Toastify CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
-
-    <!-- Toastify JS -->
     <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
 </head>
 <body>
     <style>
-        .account-panel {
-            width: 400px;
-            height: 100%;
-            background-color: #f9f9f9;
-            border-radius: 15px;
-            padding: 30px;
-            box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
-            position: absolute;
-            top: 0;
-            right: 0;
-            display: none; /* Hidden by default */
-            z-index: 1000;
-            transition: transform 0.3s ease-in-out;
-        }
-
-        .account-panel.active {
-            display: block;
-            transform: translateX(0);
-        }
-
-        .account-panel .close-btn {
-            position: absolute;
-            top: 15px;
-            right: 20px;
-            background: none;
-            border: none;
-            font-size: 20px;
-            cursor: pointer;
-        }
-        .form-control, .form-select {
-            border: 1px solid black;
-            border-radius: 10px;
-            box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
-            margin-bottom: 15px;
-        }
-        .btn-custom {
-            border-radius: 10px;
-            padding: 5px 20px;
-            background-color: #578FCA;
-            border: none;
-            transition: background-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
-            box-shadow: 0 4px 6px rgba(128, 128, 128, 0.3); /* bottom-only gray shadow */
-        }
-        .btn-custom:hover {
-            background-color: #4176ad; /* Slightly darker shade */
-            transform: translateY(-2px); /* Subtle lift effect */
-            box-shadow: 3px 3px 10px rgba(0, 0, 0, 0.25); /* Softer and deeper shadow */
-        }
-        .section-title {
-            margin-top: 40px;
-            margin-bottom: 30px;
-            font-weight: bold;
-            font-size: 24px;
-        }
-        .subsection-title {
-            font-weight: bold;
-            font-size: 14px;
-        }
         .profile-icon {
             font-size: 80px;
             display: block;
             margin: 20px auto;
+        }
+        body {
+        background-color: #f9f7f3;
+        font-family: 'Segoe UI', sans-serif;
+        }
+
+        .form-container,
+        .form-container1 {
+            background-color: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
+            padding: 25px;
+            margin-bottom: 30px;
+        }
+
+        .form-label {
+            font-weight: 600;
+        }
+
+        .form-control {
+            border-radius: 8px;
+            padding: 12px;
+            box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.04);
+            border: 1px solid #ccc;
+            background-color: #fdfdfd;
+        }
+
+        .btn-pastel {
+            background-color: #60B5FF;
+            color: #000;
+            border: none;
+            padding: 10px 18px;
+            font-weight: 500;
+            border-radius: 6px;
+            transition: background-color 0.2s ease-in-out;
+        }
+
+        .btn-pastel:hover {
+            background-color: #3D90D7;
+            color: #000;
         }
         /* .modal-container {
             position: fixed;
@@ -157,77 +137,84 @@
     </div>
 
 
-        <!-- Account Modal -->
-    <div class="container my-5 p-4 border rounded-5 shadow-lg bg-white">
+    <!-- Redesigned Account Modal -->
+    <div class="container my-5 px-2">
         <!-- Account Information Section -->
-        <h4 class="mb-4 text-center">Account Information</h4>
+        <div class="form-container">
+            <h5 class="mb-3">Account Information</h5>
+            <form action="{{ route('account.updateInfo') }}" method="POST" enctype="multipart/form-data">
+                @csrf
 
-        <form action="{{ route('account.updateInfo') }}" method="POST" enctype="multipart/form-data">
-            @csrf
+                <div class="mb-3">
+                    <label class="form-label">First Name</label>
+                    <input type="text" class="form-control" id="firstName" name="first_name" value="{{ auth()->user()->first_name }}" placeholder="Enter first name" readonly />
+                </div>
 
-            <div class="mb-3">
-                <label for="firstName" class="form-label">First Name</label>
-                <input type="text" class="form-control form-control-lg rounded-3 shadow-none border-0 bg-light"
-                    id="firstName" name="first_name" value="{{ auth()->user()->first_name }}" placeholder="Enter first name" style="background-color: #f0f8ff;">
-            </div>
+                <div class="mb-3">
+                    <label class="form-label">Last Name</label>
+                    <input type="text" class="form-control" id="lastName" name="last_name" value="{{ auth()->user()->last_name }}" placeholder="Enter last name" readonly />
+                </div>
 
-            <div class="mb-3">
-                <label for="lastName" class="form-label">Last Name</label>
-                <input type="text" class="form-control form-control-lg rounded-3 shadow-none border-0 bg-light"
-                    id="lastName" name="last_name" value="{{ auth()->user()->last_name }}" placeholder="Enter last name" style="background-color: #f0f8ff;">
-            </div>
+                <div class="mb-3">
+                    <label class="form-label">Email Address</label>
+                    <input type="email" class="form-control" id="email" name="email" value="{{ auth()->user()->email }}" placeholder="Enter email" />
+                </div>
 
-            <div class="mb-3">
-                <label for="email" class="form-label">Email Address</label>
-                <input type="email" class="form-control form-control-lg rounded-3 shadow-none border-0 bg-light"
-                    id="email" name="email" value="{{ auth()->user()->email }}" placeholder="Enter email" style="background-color: #f0f8ff;">
-            </div>
+                <div class="mb-3">
+                    <label class="form-label">Upload Profile Picture</label>
+                    <input type="file" class="form-control" id="profilePicture" name="profile_picture" accept="image/*" />
+                </div>
 
-            <div class="mb-3">
-                <label for="profilePicture" class="form-label">Upload Profile Picture</label>
-                <input type="file" class="form-control form-control-lg rounded-3 shadow-none border-0 bg-light"
-                    id="profilePicture" name="profile_picture" accept="image/*" style="background-color: #f0f8ff;">
-            </div>
+                <div class="text-start mt-3">
+                    <button type="submit" class="btn btn-pastel">Update Information</button>
+                </div>
+            </form>
+        </div>
 
-            <div class="d-flex justify-content-start    mt-4">
-                <button type="submit" class="btn btn-primary btn-lg rounded-3 shadow-sm" style="background-color: #578fca; border-color: #add8e6;">
-                    Update Information
-                </button>
-            </div>
-        </form>
-
-        <hr class="my-4">
+        <!-- Divider -->
+        <div class="my-4"></div>
 
         <!-- Account Settings Section -->
-        <h4 class="mb-4 text-center">Account Settings</h4>
+        <div class="form-container1">
+            <h5 class="mb-3">Account Settings</h5>
+            <form action="{{ route('account.changePassword') }}" method="POST">
+                @csrf
 
-        <form action="{{ route('account.changePassword') }}" method="POST">
-            @csrf
+                <div class="mb-3">
+                    <label class="form-label">Old Password</label>
+                    <div class="input-group">
+                        <input type="password" class="form-control" id="oldPassword" name="old_password" placeholder="Enter Old Password" required />
+                        <button class="btn btn-outline-secondary" type="button" onclick="toggleVisibility('oldPassword', this)">
+                            <i class="fa-solid fa-eye"></i>
+                        </button>
+                    </div>
+                </div>
 
-            <div class="mb-3">
-                <label for="oldPassword" class="form-label">Old Password</label>
-                <input type="password" class="form-control form-control-lg rounded-3 shadow-none border-0 bg-light"
-                    id="oldPassword" name="old_password" placeholder="Enter Old Password" required style="background-color: #f0f8ff;">
-            </div>
+                <div class="mb-3">
+                    <label class="form-label">New Password</label>
+                    <div class="input-group">
+                        <input type="password" class="form-control" id="newPassword" name="new_password" placeholder="Enter New Password" required />
+                        <button class="btn btn-outline-secondary" type="button" onclick="toggleVisibility('newPassword', this)">
+                            <i class="fa-solid fa-eye"></i>
+                        </button>
+                    </div>
+                </div>
 
-            <div class="mb-3">
-                <label for="newPassword" class="form-label">New Password</label>
-                <input type="password" class="form-control form-control-lg rounded-3 shadow-none border-0 bg-light"
-                    id="newPassword" name="new_password" placeholder="Enter New Password" required style="background-color: #f0f8ff;">
-            </div>
+                <div class="mb-3">
+                    <label class="form-label">Re-enter New Password</label>
+                    <div class="input-group">
+                        <input type="password" class="form-control" id="newPasswordConfirmation" name="new_password_confirmation" placeholder="Re-enter New Password" required />
+                        <button class="btn btn-outline-secondary" type="button" onclick="toggleVisibility('newPasswordConfirmation', this)">
+                            <i class="fa-solid fa-eye"></i>
+                        </button>
+                    </div>
+                </div>
 
-            <div class="mb-3">
-                <label for="newPasswordConfirmation" class="form-label">Re-enter New Password</label>
-                <input type="password" class="form-control form-control-lg rounded-3 shadow-none border-0 bg-light"
-                    id="newPasswordConfirmation" name="new_password_confirmation" placeholder="Re-enter New Password" required style="background-color: #f0f8ff;">
-            </div>
-
-            <div class="d-flex justify-content-start mt-4">
-                <button type="submit" class="btn btn-primary btn-lg rounded-3 shadow-sm" style="background-color: #578fca; border-color: #add8e6;">
-                    Update Password
-                </button>
-            </div>
-        </form>
+                <div class="text-start mt-3">
+                    <button type="submit" class="btn btn-pastel">Update Password</button>
+                </div>
+            </form>
+        </div>
     </div>
 
                     <!-- Display success message -->
@@ -287,6 +274,31 @@
 
         function closeAccountModal() {
             document.getElementById('accountModal').classList.remove('active');
+        }
+    </script>
+
+    <script>
+        window.addEventListener("pageshow", function (event) {
+            if (event.persisted || (window.performance && window.performance.navigation.type === 2)) {
+                window.location.reload();
+            }
+        });
+    </script>
+
+    <script>
+        function toggleVisibility(id, button) {
+            const input = document.getElementById(id);
+            const icon = button.querySelector("i");
+
+            if (input.type === "password") {
+                input.type = "text";
+                icon.classList.remove("fa-eye");
+                icon.classList.add("fa-eye-slash");
+            } else {
+                input.type = "password";
+                icon.classList.remove("fa-eye-slash");
+                icon.classList.add("fa-eye");
+            }
         }
     </script>
 

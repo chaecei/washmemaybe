@@ -201,20 +201,29 @@
         <form method="GET" action="{{ route('reports') }}" class="filter-form">
             <label for="year">Year:</label>
             <select name="year" id="year">
-            @for ($y = $maxYear; $y >= $minYear; $y--)
-                <option value="{{ $y }}" {{ $y == $year ? 'selected' : '' }}>{{ $y }}</option>
-            @endfor
+                @for ($y = $maxYear; $y >= $minYear; $y--)
+                    <option value="{{ $y }}" {{ $y == $year ? 'selected' : '' }}>{{ $y }}</option>
+                @endfor
             </select>
 
             <label for="month">Month:</label>
             <select name="month" id="month">
-            <option value="">All</option>
-            @foreach(range(1,12) as $m)
-                <option value="{{ $m }}" {{ $month == $m ? 'selected' : '' }}>{{ \Carbon\Carbon::create()->month($m)->format('F') }}</option>
-            @endforeach
+                <option value="">All</option>
+                @foreach(range(1,12) as $m)
+                    <option value="{{ $m }}" {{ $month == $m ? 'selected' : '' }}>{{ \Carbon\Carbon::create()->month($m)->format('F') }}</option>
+                @endforeach
             </select>
 
-            <button type="submit">Filter</button>
+            <!-- Add this new week filter -->
+            <label for="week" id="weekLabel" style="display:none; margin-left: 1rem;">Week:</label>
+            <select name="week" id="week" style="display:none;">
+                <option value="1" {{ request('week') == '1' ? 'selected' : '' }}>Week 1 (Days 1-7)</option>
+                <option value="2" {{ request('week') == '2' ? 'selected' : '' }}>Week 2 (Days 8-14)</option>
+                <option value="3" {{ request('week') == '3' ? 'selected' : '' }}>Week 3 (Days 15-21)</option>
+                <option value="4" {{ request('week') == '4' ? 'selected' : '' }}>Week 4 (Days 22-End)</option>
+            </select>
+
+            <button type="submit" style="margin-left: 1rem;">Filter</button>
         </form>
 
         <!-- Content: Chart left, summary right -->
@@ -231,10 +240,31 @@
             </div>
         </div>
     </div>
-
 </div>
 
     <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const monthSelect = document.getElementById('month');
+            const weekSelect = document.getElementById('week');
+            const weekLabel = document.getElementById('weekLabel');
+
+            function toggleWeekSelector() {
+                if (monthSelect.value) {
+                    weekSelect.style.display = 'inline-block';
+                    weekLabel.style.display = 'inline-block';
+                } else {
+                    weekSelect.style.display = 'none';
+                    weekLabel.style.display = 'none';
+                    weekSelect.value = ''; // reset week select if month is cleared
+                }
+            }
+
+            // Run on page load in case month is already selected (e.g., on page reload)
+            toggleWeekSelector();
+
+            // Listen for changes on month select
+            monthSelect.addEventListener('change', toggleWeekSelector);
+        });
     const ctx = document.getElementById('reportChart').getContext('2d');
     const reportChart = new Chart(ctx, {
         type: 'bar',
@@ -292,3 +322,14 @@
         }
     });
     </script>
+
+    <script>
+        window.addEventListener("pageshow", function (event) {
+            if (event.persisted || (window.performance && window.performance.navigation.type === 2)) {
+                window.location.reload();
+            }
+        });
+    </script>
+
+</body>
+</html>
