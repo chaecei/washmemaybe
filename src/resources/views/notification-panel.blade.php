@@ -2,28 +2,16 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Notifications – Laundry Shop Admin</title>
+  <title>Notifications</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
   <link rel="stylesheet" href="https://cdn.datatables.net/responsive/2.5.0/css/responsive.bootstrap5.min.css">
-
   <link rel="stylesheet" href="{{ asset('css/dashboard.css') }}">
+  <link rel="stylesheet" href="{{ asset('css/notification.css') }}">
 </head>
+
 <body class="flex bg-[#D4F6FF] min-h-screen font-sans">
-
-<style>
-    /* Highlight new notifications with gray background */
-  table#notificationsTable tbody tr {
-    transition: background-color 0.3s ease;
-  }
-
-  /* Gray color for new (unread) notifications */
-  table#notificationsTable tbody tr.new-notification {
-    background-color: #f0f0f0;  /* Subtle gray color */
-    font-weight: bold;          /* Make the text bold to emphasize it */
-  }
-</style>
 
 
     <div class="sidebar">
@@ -111,7 +99,7 @@
           searching: true,
           info: true,
           autoWidth: false,
-          order: [[0, 'desc']] // Order by the first column (Date and Time) in descending order
+          order: [[0, 'desc']] 
       });
 
       function loadNotifications() {
@@ -122,7 +110,7 @@
                   table.clear();
                   data.forEach(n => {
                       table.row.add([
-                          new Date(n.created_at).toLocaleString(), // Format the date and time
+                          new Date(n.created_at).toLocaleString(),
                           n.message
                       ]);
                   });
@@ -135,7 +123,7 @@
       }
 
       loadNotifications();
-      setInterval(loadNotifications, 30000); // Refresh notifications every 30 seconds
+      setInterval(loadNotifications, 30000);
   });
 </script>
 

@@ -8,68 +8,11 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="{{ asset('css/dashboard.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/service.css') }}">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
 </head>
 <body>
-    <style>
-        body {
-        background-color: #f9f7f3;
-        font-family: 'Segoe UI', sans-serif;
-        }
-
-        .form-container {
-        background-color: #ffffff;
-        border-radius: 12px;
-        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
-        padding: 25px;
-        margin-top: 40px;
-        }
-        .form-container1 {
-        background-color: #ffffff;
-        border-radius: 12px;
-        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
-        padding: 25px;
-        }
-
-        .order-block {
-        background-color: #E8F9FF;
-        border-radius: 12px;
-        padding: 20px;
-        margin-bottom: 20px;
-        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.04);
-        }
-
-        .btn-pastel {
-        background-color: #60B5FF;
-        color: #000;
-        border: 'none';
-        }
-
-        .btn-pastel:hover {
-        background-color: #3D90D7;
-        color: #000;
-        }
-
-        .form-label {
-        font-weight: 600;
-        }
-
-        .hidden {
-        display: none;
-        }
-
-        .fade-in {
-        animation: fadeIn 0.5s ease-in-out;
-        }
-
-        @keyframes fadeIn {
-        from {opacity: 0;}
-        to {opacity: 1;}
-        }
-
-    </style>
-
     <div class="sidebar">
         <ul>
         <li class="{{ request()->routeIs('dashboard') ? 'active' : '' }}">
@@ -149,6 +92,8 @@
                                         class="form-control"
                                         placeholder="09xxxxxxxxx"
                                         maxlength="11"
+                                        pattern="^\d{11}$"
+                                        title="Mobile number must be exactly 11 digits."
                                         required
                                     />
                                 </div>
@@ -172,6 +117,7 @@
                         <!-- Order Template -->
                         <template id="orderTemplate">
                             <div class="order-block fade-in mb-4">
+                                <button type="button" class="remove-order-btn btn-close position-absolute top-0 end-0 m-2" aria-label="Remove order"></button>
                                 <h6 class="mb-3">Order <span class="order-number"></span></h6>
 
                                 <!-- Service Type -->
@@ -219,9 +165,9 @@
                                 </div>
                             </div>
                         </template>
-
+                    </div>
+                </div>
             </form>
-
         </div>
     </div>
 
@@ -370,23 +316,41 @@
     // Add event listeners to check form validity whenever a field is changed
     document.getElementById('orderContainer').addEventListener('input', checkFormValidity);
     document.getElementById('orderContainer').addEventListener('change', checkFormValidity);
+
+    document.getElementById('orderContainer').addEventListener('click', function(e) {
+        if (e.target.classList.contains('remove-order-btn')) {
+            e.target.closest('.order-block').remove();
+
+            // Update order numbers
+            const orderNumbers = document.querySelectorAll('.order-number');
+            orderNumbers.forEach((el, index) => {
+                el.textContent = index + 1;
+            });
+
+            // Check if submit button should be enabled or disabled
+            checkFormValidity();
+        }
+    });
+
 </script>
 
 <script>
-    let orderCount = 1;
-
-    
     function addOrder() {
+        const orderContainer = document.getElementById("orderContainer");
         const orderTemplate = document.getElementById("orderTemplate").content.cloneNode(true);
         const orderBlock = orderTemplate.querySelector(".order-block");
 
-        // Set the order number
-        orderBlock.querySelector(".order-number").innerText = orderCount;
+        // Calculate the current number of order blocks inside container
+        const currentOrderCount = orderContainer.querySelectorAll(".order-block").length;
 
-        // Update all radio inputs to share the same 'name' so only one can be selected per order
+        // Set the order number to current count + 1
+        const orderNumber = currentOrderCount + 1;
+        orderBlock.querySelector(".order-number").innerText = orderNumber;
+
+        // Update radio inputs to have unique 'name' attributes based on the order number
         const serviceTypeInputs = orderBlock.querySelectorAll(".service-type");
-        serviceTypeInputs.forEach((input, index) => {
-            input.name = `service_type_${orderCount}`; // unique name per order
+        serviceTypeInputs.forEach(input => {
+            input.name = `service_type_${orderNumber}`;
         });
 
         // Add change listener to show fields when a service type is selected
@@ -396,14 +360,13 @@
             });
         });
 
-        // Append the new order
-        document.getElementById("orderContainer").appendChild(orderTemplate);
+        // Append the new order block
+        orderContainer.appendChild(orderTemplate);
 
-        // Enable submit button after adding at least one order
+        // Enable submit button if there is at least one order
         document.getElementById("submitServiceBtn").disabled = false;
-
-        orderCount++;
     }
+
 
 
     function toggleOrderFields(orderBlock) {

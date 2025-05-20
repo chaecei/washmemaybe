@@ -7,8 +7,8 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link rel="stylesheet" href="{{ asset('css/dashboard.css') }}">
+
 </head>
-<body>
 <body>
     <div class="sidebar">
         <ul>
@@ -124,15 +124,11 @@
             </div>
         @endif
 
-
-
-        {{-- EXPENSE LIST --}}
         @if($mode === 'index')
             <div class="card mb-4">
                 <div class="card-header d-flex flex-column flex-md-row justify-content-between align-items-md-center">
                     <span class="h5 mb-2 mb-md-0">Expenses Overview</span>
                     <form method="GET" action="{{ route('expenses.index') }}" class="d-flex flex-column flex-md-row gap-2 align-items-center">
-                        <a href="{{ route('expenses.index') }}" class="btn btn-outline-secondary">Reset</a>
                         <a href="{{ route('expenses.create') }}" class="btn btn-primary">
                             <i class="fas fa-plus me-1"></i> Add Expense
                         </a>
@@ -147,8 +143,8 @@
                                 <thead class="table-light">
                                     <tr>
                                         <th class="text-center">Date</th>
-                                        <th class="text-center">Type</th>
                                         <th class="text-center">Category</th>
+                                        <th class="text-center">Type</th>
                                         <th class="text-center">Amount (₱)</th>
                                         <th class="text-center">Actions</th>
                                     </tr>
@@ -157,8 +153,8 @@
                                     @foreach($expenses as $expense)
                                         <tr>
                                             <td>{{ \Carbon\Carbon::parse($expense->date)->format('M d, Y') }}</td>
-                                            <td>{{ ucfirst($expense->description) }}</td>
                                             <td>{{ ucfirst($expense->category) }}</td>
+                                            <td>{{ ucfirst($expense->description) }}</td>
                                             <td>₱{{ number_format($expense->amount, 2) }}</td>
                                             <td>
                                                 <a href="{{ route('expenses.edit', $expense->id) }}" class="btn btn-sm btn-warning">
@@ -176,41 +172,40 @@
                                     @endforeach
                                 </tbody>
                             </table>
-                            <div class="mt-3">
-                                {{ $expenses->appends(request()->query())->links() }}
-                            </div>
                         </div>
                     @endif
                 </div>
             </div>
         @endif
     </div>
-
-
+    
 <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
-<script src="https://cdn.datatables.net/buttons/2.4.1/js/dataTables.buttons.min.js"></script>
-<script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.html5.min.js"></script>
-<script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.print.min.js"></script>
 
 <script>
-    $(document).ready(function() {
-        $('#expensesTable').DataTable();
+    $(document).ready(function () {
+        if ($.fn.DataTable.isDataTable('#expensesTable')) {
+            $('#expensesTable').DataTable().clear().destroy();
+        }
+
+        $('#expensesTable').DataTable({
+            paging: true,
+            searching: true,
+            info: true,
+            autoWidth: false,
+            order: [[0, 'desc']],
+            language: {
+                search: "Search expenses:",
+                emptyTable: "No expenses recorded yet.",
+                paginate: {
+                    previous: "Previous",
+                    next: "Next"
+                }
+            }
+        });
     });
-</script>
 
-<script>
-  $('#expensesTable').DataTable({
-      pageLength: 10,
-      order: [[0, 'desc']],
-      language: {
-          search: "Search expenses:",
-          emptyTable: "No expenses recorded yet."
-          dom: 'Bfrtip',
-          buttons: ['copy', 'csv', 'excel', 'print']
-      }
-  });
 </script>
 
 <script>

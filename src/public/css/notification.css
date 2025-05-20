@@ -1,0 +1,8 @@
+table#notificationsTable tbody tr {
+    transition: background-color 0.3s ease;
+}
+
+table#notificationsTable tbody tr.new-notification {
+    background-color: #f0f0f0;
+    font-weight: bold;
+}

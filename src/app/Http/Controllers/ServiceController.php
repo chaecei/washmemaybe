@@ -77,7 +77,6 @@ class ServiceController extends Controller
 
         $request->merge(['orders' => $orders]);
 
-        // Validate incoming data
         $validated = $request->validate([
             'first_name' => 'required|string',
             'last_name' => 'required|string',
@@ -89,12 +88,10 @@ class ServiceController extends Controller
             'orders.*.softener' => 'required|string',
         ]);
 
-         $calculation = $this->calculateOrderPrices($validated['orders']);
+        $calculation = $this->calculateOrderPrices($validated['orders']);
 
-        // Calculate grand total
         $grandTotal = 0;
         foreach ($validated['orders'] as &$orderItem) {
-            // Set detergent prices
             switch ($orderItem['detergent']) {
                 case 'Regular Detergent': $orderItem['detergent_price'] = 20; break;
                 case 'Hypoallergenic': $orderItem['detergent_price'] = 30; break;
@@ -102,7 +99,6 @@ class ServiceController extends Controller
                 default: $orderItem['detergent_price'] = 0;
             }
 
-            // Set softener prices
             switch ($orderItem['softener']) {
                 case 'Regular': $orderItem['softener_price'] = 10; break;
                 case 'Floral': $orderItem['softener_price'] = 20; break;
@@ -112,31 +108,21 @@ class ServiceController extends Controller
                 default: $orderItem['softener_price'] = 0;
             }
 
-            // Set service prices based on the service type
             $servicePrices = [
                 'Wash and Dry' => 150,
                 'Wash and Fold' => 120,
             ];
 
             $serviceType = $orderItem['service_type'];
-            $pricePerLoad = $servicePrices[$serviceType] ?? 150;  // Default to 150 if undefined
+            $pricePerLoad = $servicePrices[$serviceType] ?? 150;
             $orderItem['total_load_price'] = $orderItem['total_load'] * $pricePerLoad;
-
-            // Calculate grand total    
+  
             $grandTotal += $orderItem['total_load_price'] + $orderItem['detergent_price'] + $orderItem['softener_price'];
-
-            return response()->json([ // Added now
-                'grand_total' => $grandTotal,
-                'order_items' => $validated['orders'], // To show the updated prices per item
-            ]);
         }
 
-        // Check if customer exists with the provided mobile number
-        // Search for existing customer by mobile number
         $existingCustomer = Customer::where('mobile_number', $validated['mobile_number'])->first();
 
         if ($existingCustomer) {
-            // Check name match
             if (
                 $existingCustomer->first_name !== $validated['first_name'] ||
                 $existingCustomer->last_name !== $validated['last_name']
@@ -146,21 +132,17 @@ class ServiceController extends Controller
                 ])->withInput();
             }
 
-            // Reuse existing customer
             $customer = $existingCustomer;
         } else {
-            // Create new customer
             $customer = Customer::create($validated);
         }
-        // Create the order and save the grand total in orders table
+        
         $order = new Order();
         $order->customer_id = $customer->id;
         $order->grand_total = $grandTotal;
         $order->save();
 
-        // Create the order items and associate them with the order
         foreach ($validated['orders'] as $orderItem) {
-            // Link order items with the newly created order
             $order->items()->create([
                 'service_type' => $orderItem['service_type'],
                 'total_load' => $orderItem['total_load'],
@@ -172,10 +154,10 @@ class ServiceController extends Controller
             ]);
         }
 
-        $payment = new Payment(); // Assuming you have a Payment model
-        $payment->order_id = $order->id;  // Associate payment with order
-        $payment->amount = $validated['payment_amount'];  // The payment amount from the request
-        $payment->payment_method = $validated['payment_method'];  // The payment method (e.g., 'Cash', 'Credit Card')
+        $payment = new Payment();
+        $payment->order_id = $order->id;
+        $payment->amount = $validated['payment_amount'];
+        $payment->payment_method = $validated['payment_method'];
         $payment->save();
 
         Category::create([
@@ -184,16 +166,13 @@ class ServiceController extends Controller
             'days_unclaimed' => 0,
         ]);
 
-        // Notification creation (for new order)
         Notification::create([
             'type' => 'order_created',
             'message' => 'A new order was added.',
         ]);
 
-        // Transaction handling (Optional, but good practice)
         \DB::beginTransaction();
         try {
-            // Commit transaction if no errors
             \DB::commit();
         } catch (\Exception $e) {
             \DB::rollBack();
@@ -203,10 +182,11 @@ class ServiceController extends Controller
             ], 500);
         }
 
-        // Return success response with order ID
         return response()->json([
             'success' => true,
             'order_id' => $order->id,
+            'grand_total' => $grandTotal,
+            'order_items' => $validated['orders'],
         ]);
     }
 

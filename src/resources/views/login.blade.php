@@ -10,7 +10,6 @@
 <body class="bg-[#D4F6FF] min-h-screen flex items-center justify-center font-sans">
     <div class="bg-[#FBFBFB] w-full max-w-5xl mx-4 md:mx-auto flex flex-col md:flex-row items-center justify-between rounded-lg shadow-xl overflow-hidden">
         
-        <!-- Left: Login Form -->
         <div class="w-full md:w-1/2 p-10">
             <h1 class="text-3xl font-bold text-[#1b1b1b] mb-6">Laundry Shop Name</h1>
             <p class="text-sm text-gray-600 mb-4 font-medium">Login as Admin</p>
@@ -46,7 +45,6 @@
             </form>
         </div>
 
-        <!-- Right: Image -->
         <div class="w-full md:w-1/2 h-64 md:h-full bg-[#C6E7FF] flex items-center justify-center p-6">
         <img src="{{ asset('laundry-image.png') }}" alt="Laundry Logo"> 
         </div>

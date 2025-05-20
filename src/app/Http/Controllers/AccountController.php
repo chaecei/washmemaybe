@@ -9,14 +9,12 @@ use App\Models\Notification;
 
 class AccountController extends Controller
 {
-        // Show the Account Settings Page
     public function showSettings ()
     {
         $activePage = 'account';
         return view('account', compact('activePage')); //this will show the blade page
     }
 
-    // Update Account Information
     public function updateInfo (Request $request)
     {
         $user = Auth::user(); //get the current logged in admin

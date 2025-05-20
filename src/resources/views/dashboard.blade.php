@@ -405,7 +405,7 @@
             if (status === 'Pending') {
                 buttons = `<button class="btn btn-sm btn-primary" onclick="updateOrderStatus(${order.id}, 'Processing')">Start Processing</button>`;
             } else if (status === 'Processing') {
-                buttons = `<button class="btn btn-sm btn-success" onclick="updateOrderStatus(${order.id}, 'Ready for Pickup')">Mark as Ready</button>`;
+                buttons = `<button class="btn btn-sm btn-success" onclick="updateOrderStatus(${order.id}, 'Ready for Pickup')"> Mark as Ready for Pickup</button>`;
             } else if (status === 'Ready for Pickup') {
                 buttons = `<button class="btn btn-sm btn-success" onclick="updateOrderStatus(${order.id}, 'Completed')">Mark as Completed</button>
                         <button class="btn btn-sm btn-danger ms-2" onclick="updateOrderStatus(${order.id}, 'Unclaimed')">Mark as Unclaimed</button>`;

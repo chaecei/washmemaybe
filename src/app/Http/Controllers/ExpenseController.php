@@ -10,7 +10,7 @@ class ExpenseController extends Controller
     // Show all expenses
     public function index()
     {
-        $expenses = Expense::latest()->paginate(10);
+        $expenses = Expense::latest()->get();
         $totalExpenses = $expenses->sum('amount');
         $mode = 'index';
 
