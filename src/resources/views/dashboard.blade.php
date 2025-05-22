@@ -3,20 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Laundry Shop Dashboard</title>
+    <title>Dashboard</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
     <link rel="stylesheet" href="{{ asset('css/dashboard.css') }}">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-<style>
-  #weekSelector:focus {
-    box-shadow: 0 0 0 0.25rem rgba(38, 120, 192, 0.25);
-    border-color: #2678c0;
-    outline: none;
-  }
-</style>
-
 </head>
 
 <body>
@@ -166,7 +158,7 @@
     document.addEventListener('DOMContentLoaded', function () {
         const weekInput = document.getElementById('weekSelector');
         const ctx = document.getElementById('weeklyOrdersChart').getContext('2d');
-        let chart; // Keep reference to the chart
+        let chart;
 
         function fetchAndRenderChart(week = null) {
             let url = '/dashboard/weekly-orders';
@@ -179,7 +171,7 @@
                 .then(data => {
                     renderPieChart(data.expenseLabels, data.expenseData);
 
-                    if (chart) chart.destroy(); // Destroy old chart before creating new one
+                    if (chart) chart.destroy();
                     chart = new Chart(ctx, {
                         type: 'bar',
                         data: {
@@ -209,10 +201,8 @@
                 .catch(error => console.error('Error loading chart:', error));
         }
 
-        // Initial load (current week)
         fetchAndRenderChart();
 
-        // Change event for filter
         weekInput.addEventListener('change', function () {
             fetchAndRenderChart(this.value);
         });
@@ -261,7 +251,7 @@
 @endif
 
 <script>
-    let pieChart; // to hold the pie chart reference
+    let pieChart;
 
     function renderPieChart(labels, data) {
         const ctx = document.getElementById('pieChart').getContext('2d');
@@ -370,13 +360,13 @@
 
                 tableHtml += `</tbody></table>`;
 
-                tableHtml += `</div></div>`; // Close card-body and card
+                tableHtml += `</div></div>`;
 
                 document.getElementById('table-container').innerHTML = tableHtml;
 
-                $('#statusTable').DataTable({
+                $(`#statusTable`).DataTable({
                     paging: true,
-                    pageLength: 10,
+                    pageLength: 15,
                     lengthChange: false,
                     ordering: true
                 });
@@ -407,8 +397,8 @@
             } else if (status === 'Processing') {
                 buttons = `<button class="btn btn-sm btn-success" onclick="updateOrderStatus(${order.id}, 'Ready for Pickup')"> Mark as Ready for Pickup</button>`;
             } else if (status === 'Ready for Pickup') {
-                buttons = `<button class="btn btn-sm btn-success" onclick="updateOrderStatus(${order.id}, 'Completed')">Mark as Completed</button>
-                        <button class="btn btn-sm btn-danger ms-2" onclick="updateOrderStatus(${order.id}, 'Unclaimed')">Mark as Unclaimed</button>`;
+                buttons = `<button class="btn btn-sm btn-success" onclick="updateOrderStatus(${order.id}, 'Completed', this)">Mark as Completed</button>
+                        <button class="btn btn-sm btn-danger ms-2" onclick="updateOrderStatus(${order.id}, 'Unclaimed', this)">Mark as Unclaimed</button>`;
             } else if (status === 'Unclaimed') {
                 buttons = `<button class="btn btn-sm btn-success" onclick="updateOrderStatus(${order.id}, 'Completed')">Mark as Claimed</button>`;
             }
@@ -446,12 +436,13 @@
             }
         }
 
-    function resetView() {
+    function resetView() { buttons = `<button class="btn btn-sm btn-success" onclick="updateOrderStatus(${order.id}, 'Completed', this)">Mark as Completed</button>
+                        <button class="btn btn-sm btn-danger ms-2" onclick="updateOrderStatus(${order.id}, 'Unclaimed', this)">Mark as Unclaimed</button>`;
         document.getElementById('table-container').style.display = 'none';
         document.getElementById('defaultView').style.display = 'block';
     }
 
-    async function updateOrderStatus(orderId, newStatus) {
+    async function updateOrderStatus(orderId, newStatus, button) {
         try {
 
             const button = document.querySelector(`button[onclick*="updateOrderStatus(${orderId}"]`);
@@ -472,7 +463,7 @@
             if (response.ok && contentType.includes('application/json')) {
                 const data = await response.json();
                 
-                // ✅ Success SweetAlert
+                // Using SweetAlert
                 await Swal.fire({
                     icon: 'success',
                     title: `Status Updated`,
@@ -481,7 +472,7 @@
                     showConfirmButton: false
                 });
 
-                // ✅ Fade out row
+                // Pag fade out
                 const row = button.closest('tr');
                 if (row) {
                     row.style.transition = 'opacity 0.5s ease-out';
@@ -492,7 +483,7 @@
 
                 const activeStatus = document.querySelector('h5.mb-0')?.textContent?.trim();
                 if (activeStatus === `${newStatus} Orders`) {
-                loadStatusTable(newStatus); // refresh target table if currently open
+                loadStatusTable(newStatus);
             }
 
              updateCardCounts();

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Laundry Shop Dashboard</title>
+    <title>Expenses</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link rel="stylesheet" href="{{ asset('css/dashboard.css') }}">
@@ -60,7 +60,6 @@
       <img src="{{ asset('images/title.png') }}" alt="Header Image" class="header-image">
     </div>
 
-      <!-- Content Wrapper -->
     <div class="content-wrapper px-4 py-5">
         <h2 class="mb-4">Laundry Shop Expenses</h2>
 
@@ -82,7 +81,6 @@
                             @error('date') <small class="text-danger">{{ $message }}</small> @enderror
                         </div>
 
-                        <!-- CATEGORY DROPDOWN -->
                         <div class="mb-3">
                             <label for="category" class="form-label">Category</label>
                             <select name="category" id="category" class="form-select" required>
@@ -97,11 +95,9 @@
                             @error('category') <small class="text-danger">{{ $message }}</small> @enderror
                         </div>
 
-                        <!-- DESCRIPTION (used for sub-category/type input) -->
                         <div class="mb-3" id="descriptionContainer">
                             <label for="description" class="form-label">Type</label>
                             <select name="description" id="description" class="form-select" required>
-                                <!-- options populated by JS -->
                             </select>
                             @error('description') <small class="text-danger">{{ $message }}</small> @enderror
                         </div>
@@ -115,8 +111,9 @@
 
                         <div class="d-flex justify-content-between">
                             <a href="{{ route('expenses.index') }}" class="btn btn-secondary">Cancel</a>
-                            <button type="submit" class="btn btn-primary">
-                                {{ $mode === 'create' ? 'Save Expense' : 'Update Expense' }}
+                            <button type="submit" class="btn btn-primary" id="submitExpenseBtn" onclick="handleSubmit(event)">
+                                <span class="spinner-border spinner-border-sm me-2 d-none" role="status" aria-hidden="true"></span>
+                                <span class="button-text">{{ $mode === 'create' ? 'Save Expense' : 'Update Expense' }}</span>
                             </button>
                         </div>
                     </form>
@@ -213,7 +210,6 @@
         const categorySelect = document.getElementById('category');
         const descriptionContainer = document.getElementById('descriptionContainer');
 
-        // Escape quotes in old value for description
         const oldDescription = `{{ old('description', $expense->description ?? '') }}`.replace(/"/g, '&quot;');
 
         const subCategories = {
@@ -222,18 +218,16 @@
             'equipment maintenance and repairs': ['Washing Machine Repair', 'Dryer Repair', 'Other Repairs'],
             'salaries and wages': ['Monthly Salaries', 'Overtime Pay', 'Bonuses'],
             'cleaning supplies': ['Cleaning Products'],
-            'other business expenses': [] // special case: text input
+            'other business expenses': []
         };
 
         function populateDescription(selectedCategory, selectedDescription = '') {
             if (selectedCategory === 'other business expenses') {
-                // Text input for 'Other Business Expenses'
                 descriptionContainer.innerHTML = `
                     <label for="description" class="form-label">Specify Type</label>
                     <input type="text" name="description" id="description" class="form-control" value="${selectedDescription}" required>
                 `;
             } else if (subCategories[selectedCategory]) {
-                // Dropdown for other categories
                 let options = '<option value="" disabled selected>Select type</option>';
                 subCategories[selectedCategory].forEach(item => {
                     const selected = item === selectedDescription ? 'selected' : '';
@@ -247,7 +241,6 @@
                     </select>
                 `;
             } else {
-                // Clear description input if no category selected
                 descriptionContainer.innerHTML = '';
             }
         }
@@ -256,7 +249,6 @@
             populateDescription(e.target.value);
         });
 
-        // Populate on page load (edit form or after validation error)
         populateDescription(categorySelect.value, oldDescription);
     });
 </script>
@@ -324,6 +316,22 @@
     });
 </script>
 
+<script>
+    function handleSubmit(event) {
+        const button = event.currentTarget;
+
+        const spinner = button.querySelector('.spinner-border');
+        const text = button.querySelector('.button-text');
+
+        button.disabled = true;
+
+        spinner.classList.remove('d-none');
+
+        text.textContent = '{{ $mode === 'create' ? 'Saving...' : 'Updating...' }}';
+
+        button.closest('form').submit();
+    }
+</script>
 
 </body>
 </html>

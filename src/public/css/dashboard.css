@@ -327,6 +327,12 @@ a {
     padding: 20px;
 }
 
+#weekSelector:focus {
+box-shadow: 0 0 0 0.25rem rgba(38, 120, 192, 0.25);
+border-color: #2678c0;
+outline: none;
+}
+
 /* Media Queries for Responsiveness */
 @media (max-width: 768px) {
     .table {

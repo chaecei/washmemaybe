@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Expense;
+use App\Models\Notification;
 use Illuminate\Http\Request;
 
 class ExpenseController extends Controller
@@ -30,6 +31,7 @@ class ExpenseController extends Controller
     public function create()
     {
         $mode = 'create';
+
         return view('expenses', compact('mode'));
     }
 
@@ -45,17 +47,20 @@ class ExpenseController extends Controller
 
         Expense::create($request->all());
 
+        Notification::create([
+            'type' => 'expense_created',
+            'message' => "{$request->description} was paid for ₱" . number_format($request->amount, 2),
+        ]);
+
         return redirect()->route('expenses.index')->with('success', 'Expense added successfully.');
     }
 
-    // Show form to edit an existing expense
     public function edit(Expense $expense)
     {
         $mode = 'edit';
         return view('expenses', compact('expense', 'mode'));
     }
 
-    // Update an existing expense
     public function update(Request $request, Expense $expense)
     {
         $request->validate([
@@ -67,13 +72,25 @@ class ExpenseController extends Controller
 
         $expense->update($request->all());
 
+        Notification::create([
+            'type' => 'expense_updated',
+            'message' => "{$request->description} was updated for ₱" . number_format($request->amount, 2),
+        ]);
+
         return redirect()->route('expenses.index')->with('success', 'Expense updated successfully.');
     }
 
-    // Delete an expense
     public function destroy(Expense $expense)
     {
+        $description = $expense->description;
+
         $expense->delete();
+
+        Notification::create([
+            'type' => 'expense_deleted',
+            'message' => "Expense '{$description}' was deleted.",
+        ]);
+
         return redirect()->route('expenses.index')->with('success', 'Expense deleted successfully.');
     }
 }

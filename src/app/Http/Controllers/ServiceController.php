@@ -16,42 +16,30 @@ use Illuminate\Support\Facades\Log;
 
 class ServiceController extends Controller
 {
-    // Show the services modal page
     public function showServices()
     {
         return view('services');
     }
 
-
-    // Update the order status
     public function updateStatus(Request $request, $id)
     {
-        // Find the category by its ID
-        $category = Category::findOrFail($id);  // Replace Order::findOrFail with Category::findOrFail
+        $category = Category::findOrFail($id);
 
-        // Update picked_up_at if status changed to ready/completed
         if (in_array($request->status, ['processing', 'ready for pickup', 'completed']) && $category->status !== $request->status) {
-            // This logic is the same as before, but it's applying to the Category model
             $category->picked_up_at = now();
         }
 
-        // Update the status of the category
         $category->status = $request->status;
         $category->save();
 
-        // Optional: Trigger event if you have CategoryStatusUpdated event
-        // event(new CategoryStatusUpdated($category->fresh()));
-
         return response()->json([
             'success' => true,
-            'category' => $category->fresh()  // Return the updated category
+            'category' => $category->fresh()
         ]);
     }
 
-
     public function storePayment(Request $request, Order $order)
     {
-        // Validate the payment form data
         $validated = $request->validate([
             'payment_method' => 'required|string',
             'amount' => 'required|numeric',
@@ -59,7 +47,7 @@ class ServiceController extends Controller
         ]);
             
         try {
-            $order->status = 'Paid'; // Update order status
+            $order->status = 'Paid';
             $order->save();
             return redirect()->route('dashboard')->with('success', 'Payment successfully received!');
         } catch (\Exception $e) {
@@ -116,8 +104,12 @@ class ServiceController extends Controller
             $serviceType = $orderItem['service_type'];
             $pricePerLoad = $servicePrices[$serviceType] ?? 150;
             $orderItem['total_load_price'] = $orderItem['total_load'] * $pricePerLoad;
+
+            $totalLoadPrice = $orderItem['total_load_price'];
+            $detergentPrice = $orderItem['detergent_price'];
+            $softenerPrice = $orderitem['softener_price'];
   
-            $grandTotal += $orderItem['total_load_price'] + $orderItem['detergent_price'] + $orderItem['softener_price'];
+            $grandTotal += $totalLoadPrice + $detergentPrice + $softenerPrice;
         }
 
         $existingCustomer = Customer::where('mobile_number', $validated['mobile_number'])->first();
@@ -131,45 +123,10 @@ class ServiceController extends Controller
                     'mobile_number' => 'This mobile number already exists, but the name does not match.',
                 ])->withInput();
             }
-
             $customer = $existingCustomer;
         } else {
             $customer = Customer::create($validated);
         }
-        
-        $order = new Order();
-        $order->customer_id = $customer->id;
-        $order->grand_total = $grandTotal;
-        $order->save();
-
-        foreach ($validated['orders'] as $orderItem) {
-            $order->items()->create([
-                'service_type' => $orderItem['service_type'],
-                'total_load' => $orderItem['total_load'],
-                'detergent' => $orderItem['detergent'],
-                'softener' => $orderItem['softener'],
-                'total_load_price' => $orderItem['total_load_price'],
-                'detergent_price' => $orderItem['detergent_price'],
-                'softener_price' => $orderItem['softener_price'],
-            ]);
-        }
-
-        $payment = new Payment();
-        $payment->order_id = $order->id;
-        $payment->amount = $validated['payment_amount'];
-        $payment->payment_method = $validated['payment_method'];
-        $payment->save();
-
-        Category::create([
-            'order_id' => $order->id,
-            'status' => 'Pending',
-            'days_unclaimed' => 0,
-        ]);
-
-        Notification::create([
-            'type' => 'order_created',
-            'message' => 'A new order was added.',
-        ]);
 
         \DB::beginTransaction();
         try {
@@ -227,7 +184,6 @@ class ServiceController extends Controller
     {
         $orders = Order::with('customer', 'items', )->get();  
 
-        // Pass the orders to the view
         return view('history')->with('orders', $orders);
     }
 
@@ -239,16 +195,13 @@ class ServiceController extends Controller
     public function showPayment($orderId)
     {
         try {
-            // Validate order ID (fixed missing parenthesis)
             if (!is_numeric($orderId)) {
                 return response()->json(['error' => 'Invalid order ID'], 400);
             }
 
-            // Eager load relationships with existence checks
             $order = Order::with(['customer', 'items'])
                 ->findOrFail($orderId);
 
-            // Verify required relationships exist
             if (!$order->customer) {
                 return response()->json(['error' => 'Customer data missing'], 404);
             }
@@ -257,7 +210,6 @@ class ServiceController extends Controller
                 return response()->json(['error' => 'No order items found'], 404);
             }
 
-            // Calculate prices
             $orderData = [
                 'order_id' => $order->id,
                 'customer' => [
@@ -271,7 +223,6 @@ class ServiceController extends Controller
                         'total_load' => $item->total_load,
                         'detergent' => $item->detergent,
                         'softener' => $item->softener,
-                        // Include calculated prices
                         'load_price' => $this->calculateLoadPrice($item),
                         'detergent_price' => $this->calculateDetergentPrice($item),
                         'softener_price' => $this->calculateSoftenerPrice($item),
@@ -301,7 +252,6 @@ class ServiceController extends Controller
         }
     }
 
-    // Fixed typo in service type ('Wash' instead of 'Wash')
     private function calculateLoadPrice($item): float
     {
         $servicePrices = [
@@ -339,7 +289,6 @@ class ServiceController extends Controller
         $orders = json_decode($request->orders, true);
         
         foreach ($orders as &$orderItem) {
-            // Your existing pricing logic here...
         }
 
         return response()->json([
@@ -368,18 +317,15 @@ class ServiceController extends Controller
         }
     }
 
-
-    // In your OrderController
     private function calculateOrderPrices(array $orders): array
     {
         if (empty($orders)) {
-            return []; // Or handle it gracefully
+            return [];
         }
 
         $grandTotal = 0;
         
         foreach ($orders as &$orderItem) {
-            // Your existing calculation logic
             switch ($orderItem['detergent']) {
                 case 'Regular Detergent': $orderItem['detergent_price'] = 20; break;
                 case 'Hypoallergenic': $orderItem['detergent_price'] = 30; break;
@@ -419,17 +365,15 @@ class ServiceController extends Controller
         $orders = Order::with('category')
             ->whereHas('category', fn($q) => $q->where('status', $status))
             ->orderBy('created_at', 'desc')
-            ->paginate(10); // Adjust number per page
+            ->paginate(10);
 
         return response()->json(['data' => $orders->items(), 'pagination' => $orders->toArray()]);
     }
 
     public function store(Request $request)
     {
-        // Log the request data for debugging purposes
         Log::info('Received order data', $request->all());
-        
-        // Decode and validate JSON input
+
         $data = $request->validate([
             'customer_info' => 'required|array',
             'orders' => 'required|array',
@@ -441,7 +385,6 @@ class ServiceController extends Controller
 
         DB::beginTransaction();
         try {
-            // Create or find the customer using mobile number
             $customer = Customer::firstOrCreate(
                 ['mobile_number' => $customerInfo['mobile_number']],
                 [
@@ -450,7 +393,6 @@ class ServiceController extends Controller
                 ]
             );
 
-            // Create order for the customer
             $order = Order::create([
                 'customer_id' => $customer->id,
                 'grand_total' => $data['grand_total']
@@ -464,7 +406,7 @@ class ServiceController extends Controller
 
             Notification::create([
                 'type' => 'order_created',
-                'message' => 'A new order was added.',
+                'message' => "Order ID #{$order->id} was created.",
             ]);
 
             // Add each order item

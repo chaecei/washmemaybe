@@ -3,22 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Laundry Shop Dashboard</title>
+    <title>History</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link rel="stylesheet" href="{{ asset('css/dashboard.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/history.css') }}">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
     <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
 </head>
+
 <body>
-    <style>
-    .card.shadow-6 {
-        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
-    }
-    #ordersTable th, #ordersTable td {
-        text-align: center;
-    }
-    </style>
 
 <div class="sidebar">
         <ul>
@@ -69,9 +63,7 @@
       <img src="{{ asset('images/title.png') }}" alt="Header Image" class="header-image">
     </div>
 
-    <!-- Order Summary Table Section -->
     <div class="container mt-5">
-        <!-- Adding the shadow to the card -->
         <div class="card shadow-6 p-4 rounded">
             <div class="card-body">
                 <table id="ordersTable" class="table table-bordered table-striped">
@@ -96,13 +88,13 @@
                                 
                                 <td class="text-center">
                                     @foreach($order->items as $item)
-                                        {{ $item->total_load }}<br> <!-- Display total load -->
+                                        {{ $item->total_load }}<br>
                                     @endforeach
                                 </td>
 
                                 <td class="text-center">
                                     @foreach($order->items as $item)
-                                        {{ $item->service_type }}<br> <!-- Display service type -->
+                                        {{ $item->service_type }}<br>
                                     @endforeach
                                 </td>
 
@@ -116,15 +108,11 @@
     </div>
 
 
-<!-- jQuery (required for DataTables) -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-
-<!-- DataTables CSS + JS -->
 <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
 <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
 <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
 
-<!-- Initialize DataTable -->
 <script>
         $('#ordersTable').DataTable({
             "pageLength": 10,

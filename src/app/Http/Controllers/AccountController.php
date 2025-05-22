@@ -24,28 +24,33 @@ class AccountController extends Controller
             'last_name' => 'required',
             'email' => 'required|email',
             'profile_pictures' => 'nullable|image|mimes:jpg,jpeg,png|max:4096'
-            // 'status' => 'required',
         ]);
 
         $user->first_name = $request->first_name;
         $user->last_name = $request->last_name;
         $user->email = $request->email;
-        // $user->status = $request->status;
 
-        //If a profile picture was uploaded
+        if ($user->email !== $request->email) {
+            $user->email = $request->email;
+
+            Notification::create([
+                'type' => 'email_update',
+                'message' => 'Email address was Updated.'
+            ]);
+        }
+
         if ($request->hasFile('profile_picture')) {
             $file = $request->file('profile_picture');
             $filename =  time() . '.' . $file-> getClientOriginalExtension();
             $file->move(public_path('profile_pictures'), $filename);
             $user->profile_pictures = $filename;
+       
+            Notification::create([
+                'type' => 'profile_update',
+                'message' => 'Profile picture was Updated.'
+            ]);
         }
-        
         $user->save();
-
-         Notification::create([
-            'type' => 'profile_change',
-            'message' => 'Admin changed the profile picture.'
-        ]);
 
         return back()->with('success', 'Account Information updated successfully!');    
     }

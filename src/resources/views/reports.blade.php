@@ -65,7 +65,6 @@
     
     <div class="report-container">
 
-        <!-- Filter Form -->
         <form method="GET" action="{{ route('reports') }}" class="filter-form">
             <label for="year">Year:</label>
             <select name="year" id="year">
@@ -82,7 +81,6 @@
                 @endforeach
             </select>
 
-            <!-- Add this new week filter -->
             <label for="week" id="weekLabel" style="display:none; margin-left: 1rem;">Week:</label>
             <select name="week" id="week" style="display:none;">
                 <option value="1" {{ request('week') == '1' ? 'selected' : '' }}>Week 1 (Days 1-7)</option>
@@ -94,7 +92,7 @@
             <button type="submit" style="margin-left: 1rem;">Filter</button>
         </form>
 
-        <!-- Content: Chart left, summary right -->
+        <!-- Content is: Chart left, summary right -->
         <div class="content-wrapper">
             <div class="chart-box">
             <h2>Monthly Report - {{ $year }} @if($month) - {{ \Carbon\Carbon::create($year, (int)$month, 1)->format('F') }} @endif</h2>
@@ -123,14 +121,12 @@
                 } else {
                     weekSelect.style.display = 'none';
                     weekLabel.style.display = 'none';
-                    weekSelect.value = ''; // reset week select if month is cleared
+                    weekSelect.value = '';
                 }
             }
 
-            // Run on page load in case month is already selected (e.g., on page reload)
             toggleWeekSelector();
 
-            // Listen for changes on month select
             monthSelect.addEventListener('change', toggleWeekSelector);
         });
     const ctx = document.getElementById('reportChart').getContext('2d');
@@ -153,7 +149,7 @@
         },
         options: {
         responsive: true,
-        maintainAspectRatio: false,  // makes height controlled by CSS (canvas style)
+        maintainAspectRatio: false,
         scales: {
             x: {
             title: {

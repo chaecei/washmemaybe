@@ -11,37 +11,28 @@ class Order extends Model
 {
     use HasFactory;
 
-    // Table associated with the model (if not using the default 'orders' table name)
     protected $table = 'orders';
 
-    // Fields that are mass assignable
     protected $fillable = [
-        'customer_id', // Foreign key that links to the customer
+        'customer_id',
         'id',
         'grand_total',
     ];
 
       protected $casts = [
-        'grand_total' => 'float', // ensures 2 decimal places
+        'grand_total' => 'float',
     ];
     
     public $timestamps = true;
 
-    /**
-     * Define the inverse relationship: Each order belongs to one customer.
-     */
     public function customer()
     {
-        return $this->belongsTo(Customer::class); // Each order belongs to a customer
+        return $this->belongsTo(Customer::class);
     }
+
     public function category()
     {
         return $this->hasOne(Category::class, 'order_id');
-    }
-
-    public function payment()
-    {
-        return $this->hasOne(Payment::class);
     }
     
     public function items()

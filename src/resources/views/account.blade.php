@@ -3,89 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Laundry Shop Dashboard</title>
+    <title>Account I</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link rel="stylesheet" href="{{ asset('css/dashboard.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/account.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
     <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
 </head>
 <body>
-    <style>
-        .profile-icon {
-            font-size: 80px;
-            display: block;
-            margin: 20px auto;
-        }
-        body {
-        background-color: #f9f7f3;
-        font-family: 'Segoe UI', sans-serif;
-        }
-
-        .form-container,
-        .form-container1 {
-            background-color: #ffffff;
-            border-radius: 12px;
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
-            padding: 25px;
-            margin-bottom: 30px;
-        }
-
-        .form-label {
-            font-weight: 600;
-        }
-
-        .form-control {
-            border-radius: 8px;
-            padding: 12px;
-            box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.04);
-            border: 1px solid #ccc;
-            background-color: #fdfdfd;
-        }
-
-        .btn-pastel {
-            background-color: #60B5FF;
-            color: #000;
-            border: none;
-            padding: 10px 18px;
-            font-weight: 500;
-            border-radius: 6px;
-            transition: background-color 0.2s ease-in-out;
-        }
-
-        .btn-pastel:hover {
-            background-color: #3D90D7;
-            color: #000;
-        }
-        /* .modal-container {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.5);
-            display: none;
-            justify-content: center;
-            align-items: center;
-            z-index: 2000;
-        } */
-        /* .modal-container.active {
-            display: flex;
-        }
-        .modal-content {
-            background: white;
-            border-radius: 15px;
-            padding: 40px;
-            width: 90%;
-            max-width: 700px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-            overflow-y: auto;
-            max-height: 90vh;
-            position: relative;
-        } */
-
-    </style>
 
     <div class="sidebar">
         <ul>
@@ -136,10 +63,7 @@
       <img src="{{ asset('images/title.png') }}" alt="Header Image" class="header-image">
     </div>
 
-
-    <!-- Redesigned Account Modal -->
     <div class="container my-5 px-2">
-        <!-- Account Information Section -->
         <div class="form-container">
             <h5 class="mb-3">Account Information</h5>
             <form action="{{ route('account.updateInfo') }}" method="POST" enctype="multipart/form-data">
@@ -171,10 +95,8 @@
             </form>
         </div>
 
-        <!-- Divider -->
         <div class="my-4"></div>
 
-        <!-- Account Settings Section -->
         <div class="form-container1">
             <h5 class="mb-3">Account Settings</h5>
             <form action="{{ route('account.changePassword') }}" method="POST">
@@ -217,7 +139,6 @@
         </div>
     </div>
 
-                    <!-- Display success message -->
                     @if(session('success'))
                     <script>
                         Toastify({
@@ -231,22 +152,21 @@
                     </script>
                     @endif
 
-                    <!-- Display validation errors -->
                     @if ($errors->any())
                         <script>
                             @foreach ($errors->all() as $error)
                                 Toastify({
                                     text: "{{ $error }}",
-                                    duration: 5000,  // Longer duration for errors
+                                    duration: 5000,
                                     close: true,
                                     gravity: "top",
-                                    position: "center",  // Matches success position
-                                    backgroundColor: "#dc3545",  // Bootstrap's danger red
+                                    position: "center",
+                                    backgroundColor: "#dc3545",
                                     offset: {
-                                        y: 50  // Stacks below success messages
+                                        y: 50
                                     },
-                                    ariaLive: "polite",  // Accessibility
-                                    className: "toastify-error",  // For custom styling
+                                    ariaLive: "polite",
+                                    className: "toastify-error",
                                     style: {
                                         boxShadow: "none",
                                         fontSize: "14px",

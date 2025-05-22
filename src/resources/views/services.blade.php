@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Laundry Shop Dashboard</title>
+    <title>Services</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -237,36 +237,29 @@
 <script>
     const input = document.getElementById("mobile_number");
 
-    // Set default value
     input.value = "09";
 
-    // Prevent deletion of the default "09"
     input.addEventListener("keydown", function (e) {
-        // Prevent deleting or moving cursor before index 2
         if ((input.selectionStart <= 2 && (e.key === "Backspace" || e.key === "Delete")) || 
             (e.key === "ArrowLeft" && input.selectionStart <= 2)) {
             e.preventDefault();
         }
     });
 
-    // Prevent editing before index 2
     input.addEventListener("keypress", function (e) {
         if (input.selectionStart < 2) {
             e.preventDefault();
         }
 
-        // Prevent typing more than 9 digits after "09"
         if (input.value.length >= 11) {
             e.preventDefault();
         }
 
-        // Only allow numeric characters
         if (!/\d/.test(e.key)) {
             e.preventDefault();
         }
     });
 
-    // Ensure value always starts with "09"
     input.addEventListener("input", function () {
         if (!input.value.startsWith("09")) {
             input.value = "09";
@@ -280,16 +273,13 @@
         const orderTemplate = document.getElementById('orderTemplate');
         const orderClone = orderTemplate.content.cloneNode(true);
         
-        // Append the new order block
         orderContainer.appendChild(orderClone);
 
-        // Update the order number
         const orderNumber = orderContainer.querySelectorAll('.order-block').length;
         orderContainer.querySelectorAll('.order-number').forEach((element, index) => {
             element.textContent = orderNumber;
         });
 
-        // Enable submit button if all fields are filled
         checkFormValidity();
     }
 
@@ -309,11 +299,9 @@
             }
         });
 
-        // Enable submit button if all fields are filled, else disable it
         submitButton.disabled = !allFieldsFilled;
     }
 
-    // Add event listeners to check form validity whenever a field is changed
     document.getElementById('orderContainer').addEventListener('input', checkFormValidity);
     document.getElementById('orderContainer').addEventListener('change', checkFormValidity);
 
@@ -321,13 +309,11 @@
         if (e.target.classList.contains('remove-order-btn')) {
             e.target.closest('.order-block').remove();
 
-            // Update order numbers
             const orderNumbers = document.querySelectorAll('.order-number');
             orderNumbers.forEach((el, index) => {
                 el.textContent = index + 1;
             });
 
-            // Check if submit button should be enabled or disabled
             checkFormValidity();
         }
     });
@@ -340,30 +326,24 @@
         const orderTemplate = document.getElementById("orderTemplate").content.cloneNode(true);
         const orderBlock = orderTemplate.querySelector(".order-block");
 
-        // Calculate the current number of order blocks inside container
         const currentOrderCount = orderContainer.querySelectorAll(".order-block").length;
 
-        // Set the order number to current count + 1
         const orderNumber = currentOrderCount + 1;
         orderBlock.querySelector(".order-number").innerText = orderNumber;
 
-        // Update radio inputs to have unique 'name' attributes based on the order number
         const serviceTypeInputs = orderBlock.querySelectorAll(".service-type");
         serviceTypeInputs.forEach(input => {
             input.name = `service_type_${orderNumber}`;
         });
 
-        // Add change listener to show fields when a service type is selected
         serviceTypeInputs.forEach(input => {
             input.addEventListener("change", function () {
                 toggleOrderFields(orderBlock);
             });
         });
 
-        // Append the new order block
         orderContainer.appendChild(orderTemplate);
 
-        // Enable submit button if there is at least one order
         document.getElementById("submitServiceBtn").disabled = false;
     }
 
@@ -383,14 +363,12 @@
         $("#fullServiceForm").submit(function (e) {
             e.preventDefault();
             
-            // Collect customer info
             const customerInfo = {
                 first_name: $("input[name='first_name']").val(),
                 last_name: $("input[name='last_name']").val(),
                 mobile_number: $("input[name='mobile_number']").val()
             };
 
-            // Collect order items
             const orders = [];
             let hasErrors = false;
 
@@ -403,10 +381,9 @@
                     softener: orderBlock.find(".softener").val()
                 };
 
-                // Validate required fields
                 if (!orderData.service_type || !orderData.total_load || !orderData.detergent || !orderData.softener) {
                     hasErrors = true;
-                    return false; // Exit the loop
+                    return false;
                 }
 
                 orders.push(orderData);
@@ -417,23 +394,18 @@
                 return;
             }
 
-            // Display basic info in modal immediately
             updatePaymentModal(customerInfo, orders);
 
-            // Show the modal
             const paymentModal = new bootstrap.Modal(document.getElementById('paymentModal'));
             paymentModal.show();
 
-            // Calculate prices via AJAX
             calculatePrices(customerInfo, orders);
         });
 
         function updatePaymentModal(customerInfo, orders) {
-            // Update customer info
             $("#paymentName").text(`${customerInfo.first_name} ${customerInfo.last_name}`);
             $("#paymentMobile").text(customerInfo.mobile_number);
 
-            // Update order items
             let orderItemsHTML = '';
             orders.forEach((order, index) => {
                 orderItemsHTML += `
@@ -461,7 +433,6 @@
                 },
                 success: function(response) {
                     if (response.success) {
-                        // Update the modal display
                         updatePriceDisplay(response);
                     } else {
                         showCalculationError(response.message);
@@ -474,15 +445,13 @@
         }
 
         function updatePriceDisplay(response) {
-            // Update grand total
             $("#paymentGrandTotal").text(`₱${response.grand_total.toFixed(2)}`);
             $("input[name='amount']").val(response.grand_total.toFixed(2));
 
-            // Update each order item with prices
             response.order_items.forEach((item, index) => {
                 const orderElement = $(`#paymentOrderItems .order-item:nth-child(${index + 1})`);
                 
-                orderElement.find('.price-details').remove(); // Clear previous prices
+                orderElement.find('.price-details').remove();
                 
                 orderElement.append(`
                     <div class="price-details mt-2">
@@ -493,11 +462,9 @@
                 `);
             });
 
-            // Enable the Submit Payment button
             $("#submitPaymentButton").prop('disabled', false);
         }
 
-        // Use the existing "Submit Payment" button to save the order to the database
         $("#submitPaymentButton").click(function (e) {
             e.preventDefault();
 

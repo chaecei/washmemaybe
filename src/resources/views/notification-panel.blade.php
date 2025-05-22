@@ -65,7 +65,6 @@
 
     <div class="container mt-4">
 
-    <!-- Notifications Table -->
     <div class="card border-0 shadow rounded-4">
       <div class="card-header bg-white border-bottom-0 d-flex align-items-center justify-content-between px-4 py-3">
         <h5 class="mb-0 fw-semibold text-black" style="font-size: 1.4rem;">Notifications</h5>
